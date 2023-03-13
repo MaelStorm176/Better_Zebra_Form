@@ -112,7 +112,7 @@ class Zebra_Form_Text extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $default = '', $attributes = '')
+    function __construct($id, $default = '', $attributes = [])
     {
 
         // call the constructor of the parent class

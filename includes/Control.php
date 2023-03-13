@@ -17,7 +17,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    public $attributes;
+    public array $attributes;
 
     /**
      *  Array of HTML attributes that the control's {@link render_attributes()} method should skip
@@ -26,7 +26,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    public $private_attributes;
+    public array $private_attributes;
 
     /**
      *  Array of validation rules set for the control
@@ -35,7 +35,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    public $rules;
+    public array $rules;
 
     /**
      *  Constructor of the class
@@ -44,7 +44,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    function __construct()
+    public function __construct()
     {
 
         $this->attributes = array(
@@ -86,25 +86,25 @@ class Zebra_Form_Control extends XSS_Clean
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $case   The case to convert all entered characters to.
+     *  @param  string $case   The case to convert all entered characters to.
      *
      *                          Can be (case-insensitive) "upper" or "lower".
      *
-     *  @since  2.8
-     *
      *  @return void
+     *@since  2.8
+     *
      */
-    function change_case($case)
+    function change_case(string $case): void
     {
 
         // make sure the argument is lowercase
         $case = strtolower($case);
 
         // if valid case specified
-        if ($case == 'upper' || $case == 'lower')
-
+        if ($case === 'upper' || $case === 'lower') {
             // add an extra class to the element
             $this->set_attributes(array('class' => 'modifier-' . $case . 'case'), false);
+        }
 
     }
 
@@ -121,7 +121,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function disable_spam_filter()
+    function disable_spam_filter(): void
     {
 
         // set the "disable_xss_filters" private attribute of the control
@@ -144,7 +144,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function disable_xss_filters()
+    function disable_xss_filters(): void
     {
 
         // set the "disable_xss_filters" private attribute of the control
@@ -184,7 +184,7 @@ class Zebra_Form_Control extends XSS_Clean
      *  @return array                   Returns an associative array where keys are the attributes and the values are
      *                                  each attribute's value, respectively.
      */
-    function get_attributes($attributes)
+    public function get_attributes($attributes): array
     {
 
         // initialize the array that will be returned
@@ -192,16 +192,20 @@ class Zebra_Form_Control extends XSS_Clean
 
         // if the request was for a single attribute,
         // treat it as an array of attributes
-        if (!is_array($attributes)) $attributes = array($attributes);
+        if (!is_array($attributes)) {
+            $attributes = array($attributes);
+        }
 
         // iterate through the array of attributes to look for
         foreach ($attributes as $attribute)
-
+        {
             // if attribute exists
             if (array_key_exists($attribute, $this->attributes))
-
+            {
                 // populate the $result array
                 $result[$attribute] = $this->attributes[$attribute];
+            }
+        }
 
         // return the results
         return $result;
@@ -250,7 +254,7 @@ class Zebra_Form_Control extends XSS_Clean
             ) {
 
                 // if control is a time picker control
-                if ($attribute['type'] == 'time') {
+                if ($attribute['type'] === 'time') {
 
                     // combine hour, minutes and seconds into one single string (values separated by :)
                     // hours
@@ -294,7 +298,8 @@ class Zebra_Form_Control extends XSS_Clean
                             // and also, if magic_quotes_gpc is on (meaning that
                             // both single and double quotes are escaped)
                             // strip those slashes
-                            if (get_magic_quotes_gpc()) $this->submitted_value[$key] = stripslashes($value);
+                            //if (get_magic_quotes_gpc()) $this->submitted_value[$key] = stripslashes($value);
+                            $this->submitted_value[$key] = stripslashes($value);
 
                     // if submitted value is not an array
                     } else
@@ -302,7 +307,8 @@ class Zebra_Form_Control extends XSS_Clean
                         // and also, if magic_quotes_gpc is on (meaning that both
                         // single and double quotes are escaped)
                         // strip those slashes
-                        if (get_magic_quotes_gpc()) $this->submitted_value = stripslashes($this->submitted_value);
+                        //if (get_magic_quotes_gpc()) $this->submitted_value = stripslashes($this->submitted_value);
+                        $this->submitted_value = stripslashes($this->submitted_value);
 
                     // if submitted value is an array
                     if (is_array($this->submitted_value))
@@ -328,7 +334,7 @@ class Zebra_Form_Control extends XSS_Clean
                     $method[$attribute['name']] = $this->submitted_value;
 
                 // if control is a file upload control and a file was indeed uploaded
-                } elseif ($attribute['type'] == 'file' && isset($_FILES[$attribute['name']]))
+                } elseif ($attribute['type'] === 'file' && isset($_FILES[$attribute['name']]))
 
                     $this->submitted_value = true;
 
@@ -342,7 +348,7 @@ class Zebra_Form_Control extends XSS_Clean
                 if (
 
                     //if type is password, textarea or text OR
-                    ($attribute['type'] == 'password' || $attribute['type'] == 'textarea' || $attribute['type'] == 'text') &&
+                    ($attribute['type'] === 'password' || $attribute['type'] === 'textarea' || $attribute['type'] === 'text') &&
 
                     // control has the "uppercase" or "lowercase" modifier set
                     preg_match('/\bmodifier\-uppercase\b|\bmodifier\-lowercase\b/i', $this->attributes['class'], $modifiers)
@@ -350,7 +356,7 @@ class Zebra_Form_Control extends XSS_Clean
                 ) {
 
                     // if string must be uppercase, update the value accordingly
-                    if ($modifiers[0] == 'modifier-uppercase') $this->submitted_value = strtoupper($this->submitted_value);
+                    if ($modifiers[0] === 'modifier-uppercase') $this->submitted_value = strtoupper($this->submitted_value);
 
                     // otherwise, string needs to be lowercase
                     else $this->submitted_value = strtolower($this->submitted_value);
@@ -457,11 +463,10 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function lock() {
-
+    public function lock(): void
+    {
         // set the "locked" private attribute of the control
         $this->set_attributes(array('locked' => true));
-
     }
 
     /**
@@ -540,13 +545,13 @@ class Zebra_Form_Control extends XSS_Clean
 
                 // as long as control is not label, note nor captcha
                 if (
-
-                    $attributes['type'] != 'label' &&
-                    $attributes['type'] != 'note' &&
-                    $attributes['type'] != 'captcha'
-
-                // unset the associated superglobal
-                ) unset($method[$attributes['name']]);
+                    $attributes['type'] !== 'label' &&
+                    $attributes['type'] !== 'note' &&
+                    $attributes['type'] !== 'captcha'
+                ) {
+                    // unset the associated superglobal
+                    unset($method[$attributes['name']]);
+                }
 
         }
 
@@ -602,30 +607,32 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function set_attributes($attributes, $overwrite = true)
+    function set_attributes(array $attributes, bool $overwrite = true)
     {
 
-        // check if $attributes is given as an array
-        if (is_array($attributes))
+        // iterate through the given attributes array
+        foreach ($attributes as $attribute => $value) {
 
-            // iterate through the given attributes array
-            foreach ($attributes as $attribute => $value) {
-
-                // we need to url encode the prefix as it may contain HTML entities which would produce validation errors
-                if ($attribute == 'data-prefix') $value = urlencode($value);
-
-                // if the value is to be appended to the already existing one
-                // and there is a value set for the specified attribute
-                // and the values do not represent an array
-                if (!$overwrite && isset($this->attributes[$attribute]) && !is_array($this->attributes[$attribute]))
-
-                    // append the value
-                    $this->attributes[$attribute] = $this->attributes[$attribute] . ' ' . $value;
-
-                // otherwise, add attribute to attributes array
-                else $this->attributes[$attribute] = $value;
-
+            // we need to url encode the prefix as it may contain HTML entities which would produce validation errors
+            if ($attribute === 'data-prefix') {
+                $value = urlencode($value);
             }
+
+            // if the value is to be appended to the already existing one
+            // and there is a value set for the specified attribute
+            // and the values do not represent an array
+            if (!$overwrite && isset($this->attributes[$attribute]) && !is_array($this->attributes[$attribute]))
+            {
+                // append the value
+                $this->attributes[$attribute] .= ' ' . $value;
+            }
+
+            // otherwise, add attribute to attributes array
+            else {
+                $this->attributes[$attribute] = $value;
+            }
+
+        }
 
     }
 
@@ -1954,97 +1961,101 @@ class Zebra_Form_Control extends XSS_Clean
      *  );
      *  </code>
      *
-     *  @param  array   $rules  An associative array
+     *  @param array $rules  An associative array
      *
      *                          See above how it needs to be specified for each rule
      *
      *  @return void
      */
-    function set_rule($rules)
+    public function set_rule(array $rules): void
     {
+        // iterate through the given rules
+        foreach ($rules as $rule_name => $rule_properties) {
 
-        // continue only if argument is an array
-        if (is_array($rules))
+            // make sure the rule's name is lowercase
+            $rule_name = strtolower($rule_name);
 
-            // iterate through the given rules
-            foreach ($rules as $rule_name => $rule_properties) {
+            // if custom rule
+            if ($rule_name === 'custom') {
 
-                // make sure the rule's name is lowercase
-                $rule_name = strtolower($rule_name);
+                // if more custom rules are specified at once
+                if (is_array($rule_properties[0]) && count($rule_properties[0]) >= 3) {
 
-                // if custom rule
-                if ($rule_name == 'custom')
+                    // iterate through the custom rules
+                    // and add them one by one
+                    foreach ($rule_properties as $rule) {
+                        $this->rules[$rule_name][] = $rule;
+                    }
+                }
 
-                    // if more custom rules are specified at once
-                    if (is_array($rule_properties[0]) && count($rule_properties[0]) >= 3)
+                // if a single custom rule is specified
+                // save the custom rule to the "custom" rules array
+                else {
+                    $this->rules[$rule_name][] = $rule_properties;
+                }
+            }
 
-                        // iterate through the custom rules
-                        // and add them one by one
-                        foreach ($rule_properties as $rule) $this->rules[$rule_name][] = $rule;
+            // for all the other rules
+            // add the rule to the rules array
+            else {
+                $this->rules[$rule_name] = $rule_properties;
+            }
 
-                    // if a single custom rule is specified
-                    // save the custom rule to the "custom" rules array
-                    else $this->rules[$rule_name][] = $rule_properties;
+            // for some rules we do some additional settings
+            switch ($rule_name) {
 
-                // for all the other rules
-                // add the rule to the rules array
-                else $this->rules[$rule_name] = $rule_properties;
+                // we set a reserved attribute for the control by which we're telling the
+                // _render_attributes() method to append a special class to the control when rendering it
+                // so that we can also control user input from javascript
+                case 'alphabet':
+                case 'digits':
+                case 'alphanumeric':
+                case 'number':
+                case 'float':
 
-                // for some rules we do some additional settings
-                switch ($rule_name) {
+                    $this->set_attributes(array('onkeypress' => 'javascript:return $(\'#' . $this->form_properties['name'] . '\').data(\'Zebra_Form\').filter_input(\'' . $rule_name . '\', event' . ($rule_properties[0] != '' ? ', \'' . addcslashes($rule_properties[0], '\'') . '\'' : '') . ');'));
 
-                    // we set a reserved attribute for the control by which we're telling the
-                    // _render_attributes() method to append a special class to the control when rendering it
-                    // so that we can also control user input from javascript
-                    case 'alphabet':
-                    case 'digits':
-                    case 'alphanumeric':
-                    case 'number':
-                    case 'float':
+                    // for controls having these rules,
+                    if (in_array($rule_name, array('digits', 'number', 'float')))
+                    {
+                        // change the control's type to "number"
+                        $this->set_attributes(array('type' => 'number'));
+                    }
 
-                        $this->set_attributes(array('onkeypress' => 'javascript:return $(\'#' . $this->form_properties['name'] . '\').data(\'Zebra_Form\').filter_input(\'' . $rule_name . '\', event' . ($rule_properties[0] != '' ? ', \'' . addcslashes($rule_properties[0], '\'') . '\'' : '') . ');'));
+                    break;
 
-                        // for controls having these rules,
-                        if (in_array($rule_name, array('digits', 'number', 'float')))
+                // if the rule is about the length of the input
+                case 'length':
 
-                            // change the control's type to "number"
-                            $this->set_attributes(array('type' => 'number'));
+                    // if there is a maximum of allowed characters
+                    if ($rule_properties[1] > 0) {
 
-                        break;
+                        // set the maxlength attribute of the control
+                        $this->set_attributes(array('maxlength' => $rule_properties[1]));
 
-                    // if the rule is about the length of the input
-                    case 'length':
+                        // if there is a 5th argument to the rule, the argument is boolean true
+                        if (isset($rule_properties[4]) && $rule_properties[4] === true) {
 
-                        // if there is a maximum of allowed characters
-                        if ($rule_properties[1] > 0) {
-
-                            // set the maxlength attribute of the control
-                            $this->set_attributes(array('maxlength' => $rule_properties[1]));
-
-                            // if there is a 5th argument to the rule, the argument is boolean true
-                            if (isset($rule_properties[4]) && $rule_properties[4] === true) {
-
-                                // add an extra class so that the JavaScript library will know to show the character counter
-                                $this->set_attributes(array('class' => 'show-character-counter'), false);
-
-                            }
+                            // add an extra class so that the JavaScript library will know to show the character counter
+                            $this->set_attributes(array('class' => 'show-character-counter'), false);
 
                         }
 
-                        break;
+                    }
 
-                    // if the "email" rule is set
-                    case 'email':
+                    break;
 
-                        // change the element's type to "email"
-                        $this->set_attributes(array('type' => 'email'));
+                // if the "email" rule is set
+                case 'email':
 
-                        break;
+                    // change the element's type to "email"
+                    $this->set_attributes(array('type' => 'email'));
 
-                }
+                    break;
 
             }
 
+        }
     }
 
     /**
@@ -2056,7 +2067,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    protected function _render_attributes()
+    protected function _render_attributes(): string
     {
 
         // the string to be returned
@@ -2068,20 +2079,20 @@ class Zebra_Form_Control extends XSS_Clean
             // control has the "disabled" attribute set
             isset($this->attributes['disabled']) &&
 
-            $this->attributes['disabled'] == 'disabled' &&
+            $this->attributes['disabled'] === 'disabled' &&
 
             // control is not a radio button
-            $this->attributes['type'] != 'radio' &&
+            $this->attributes['type'] !== 'radio' &&
 
             // control is not a checkbox
-            $this->attributes['type'] != 'checkbox'
-
-        // add another class to the control
-        ) $this->set_attributes(array('class' => 'disabled'), false);
+            $this->attributes['type'] !== 'checkbox'
+        ){
+            // add another class to the control
+            $this->set_attributes(array('class' => 'disabled'), false);
+        }
 
         // iterates through the control's attributes
-        foreach ($this->attributes as $attribute => $value)
-
+        foreach ($this->attributes as $attribute => $value) {
             if (
 
                 // if control has no private attributes or the attribute is not  a private attribute
@@ -2091,11 +2102,11 @@ class Zebra_Form_Control extends XSS_Clean
                 (!isset($this->javascript_attributes) || !in_array($attribute, $this->javascript_attributes))
 
             )
-
+            {
                 // add attribute => value pair to the return string
-                $attributes .=
-
-                    ($attributes != '' ? ' ' : '') . $attribute . '="' . preg_replace('/\"/', '&quot;', $value) . '"';
+                $attributes .= ($attributes != '' ? ' ' : '') . $attribute . '="' . preg_replace('/\"/', '&quot;', $value) . '"';
+            }
+        }
 
         // returns string
         return $attributes;

@@ -22,9 +22,10 @@ function dump()
 
     // if last argument is boolean TRUE
     if ($arguments[count($arguments) - 1] === true)
-
+    {
         // set a flag telling the script that it needs to die() after output
         $stop = array_pop($arguments);
+    }
 
     // iterate through the arguments
     foreach ($arguments as $argument) {
@@ -37,14 +38,16 @@ function dump()
     }
 
     // if script needs to die() after output, die
-    if (isset($stop)) die();
+    if (isset($stop)) {
+        die();
+    }
 
 }
 ?>
 
 <!doctype html>
 
-<html>
+<html lang="en">
 
     <head>
 
@@ -77,14 +80,13 @@ function dump()
                     <?php
 
                         function show_results() {
-
                             echo '<table class="results"><thead><tr><td colspan="2">Submitted values</td></tr></thead>';
 
                             foreach ($_POST as $key => $value) {
 
-                                if (strpos($key, 'name_') !== 0 && strpos($key, 'timer_') !== 0 && strpos($key, 'response_') !== 0)
-
+                                if (strpos($key, 'name_') !== 0 && strpos($key, 'timer_') !== 0 && strpos($key, 'response_') !== 0) {
                                     echo '<tr><th>' . $key . '</th><td>' . (is_array($value) ? '<pre>' . print_r($value, true) . '</pre>' : $value) . '</td></tr>';
+                                }
 
                             }
 
@@ -174,7 +176,7 @@ function dump()
 
                 <td valign="top">
 
-                    <?php if ($example != ''):?>
+                    <?php if (!empty($example)):?>
 
                     <ul class="tabs float clearfix">
 

@@ -117,7 +117,7 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $attach_to, $caption, $attributes = '')
+    function __construct($id, $attach_to, $caption, $attributes = [])
     {
 
         // call the constructor of the parent class
