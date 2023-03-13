@@ -1058,7 +1058,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
     {
 
         // all date controls must have the "date" rule set or we trigger an error
-        if (!isset($this->rules['date'])) _zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"date"</em> rule set', E_USER_ERROR);
+        if (!isset($this->rules['date'])) Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"date"</em> rule set', E_USER_ERROR);
 
         return '
             <div>

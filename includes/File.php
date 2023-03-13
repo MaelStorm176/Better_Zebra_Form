@@ -138,7 +138,7 @@ class Zebra_Form_File extends Zebra_Form_Control
     {
 
         // all file upload controls must have the "upload" rule set or we trigger an error
-        if (!isset($this->rules['upload'])) _zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"upload"</em> rule set', E_USER_ERROR);
+        if (!isset($this->rules['upload'])) Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"upload"</em> rule set', E_USER_ERROR);
 
         // if the "image" rule is set
         if (isset($this->rules['image']))
