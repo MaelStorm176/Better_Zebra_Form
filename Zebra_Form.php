@@ -1478,7 +1478,7 @@ class Zebra_Form
                 $obj = array_pop($this->controls);
 
                 // find the position of the parent control
-                $parent_position = array_search($attributes['name'], array_keys($this->controls));
+                $parent_position = array_search($attributes['name'], array_keys($this->controls), true);
 
                 // insert the control right after the parent control
                 $this->controls =
@@ -2619,7 +2619,7 @@ class Zebra_Form
                         if (strtolower(get_class($control)) === 'zebra_form_date') {
 
                             // get the date control's starting/ending date
-                            $limits = $control->_init();
+                            $limits = $control->initialize();
 
                             // set the value to the first selectable date
                             $control->set_attributes(array('value' => date($control->attributes['format'], $limits[0] > 0 ? $limits[0] : time())));
@@ -3224,7 +3224,7 @@ class Zebra_Form
                                 if (
 
                                     // initialize the datepicker's data for further calculations
-                                    ($control->_init() &&
+                                    ($control->initialize() &&
 
                                         // date has an invalid format
                                         !($timestamp = $control->_is_format_valid($attribute['value']))) ||

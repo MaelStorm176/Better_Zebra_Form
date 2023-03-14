@@ -1031,6 +1031,11 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
     }
 
+    public function initialize(): array
+    {
+        return $this->_init();
+    }
+
     /**
      *  Initializes the datepicker's data so calculations for disabled dates can be done.
      *
@@ -1281,9 +1286,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  @return false|int   Returns the UNIX timestamp of the checked date, if the date has the correct format,
      *                  or FALSE otherwise.
      *
-     *  @access private
+     *  @access public
      */
-    private function _is_format_valid($date): bool|int
+    public function _is_format_valid($date): bool|int
     {
 
         // the format we expect the date to be
@@ -1573,9 +1578,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      * @return boolean         Returns TRUE if the given value is not disabled or FALSE otherwise
      *
-     * @access private
+     * @access public
      */
-    function _is_disabled(int $year, int $month = null, int $day = null): bool
+    public function _is_disabled(int $year, int $month = null, int $day = null): bool
     {
 
         // parse the rules for disabling dates and turn them into arrays of arrays
@@ -1585,7 +1590,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
             $this->disabled_dates = array();
 
             // if disabled dates is an array and is not empty
-            if (is_array($this->attributes['disabled_dates']) && !empty($this->attributes['disabled_dates']))
+            if (is_array($this->attributes['disabled_dates']) && !empty($this->attributes['disabled_dates'])) {
 
                 // iterate through the rules for disabling dates
                 foreach ($this->attributes['disabled_dates'] as $value) {
@@ -1598,17 +1603,18 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
                         // if one of the values is not available
                         // replace it with a * (wildcard)
-                        if (!isset($rules[$i])) $rules[$i] = '*';
+                        if (!isset($rules[$i])) {
+                            $rules[$i] = '*';
+                        }
 
                         // if rule contains a comma, create a new array by splitting the rule by commas
                         // if there are no commas create an array containing the rule's string
-                        $rules[$i] = (strpos($rules[$i], ',') !== false ? explode(',', $rules[$i]) : (array)$rules[$i]);
+                        $rules[$i] = (str_contains($rules[$i], ',') ? explode(',', $rules[$i]) : (array)$rules[$i]);
 
                         // iterate through the items in the rule
-                        for ($j = 0, $jMax = count($rules[$i]); $j < $jMax; $j++)
-                        {
+                        foreach ($rules[$i] as $j => $jValue) {
                             // if item contains a dash (defining a range)
-                            if (str_contains($rules[$i][$j], '-')) {
+                            if (str_contains($jValue, '-')) {
 
                                 // get the lower and upper limits of the range
                                 // if range is valid
@@ -1618,8 +1624,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
                                     array_splice($rules[$i], $j, 1);
 
                                     // iterate through the range
-                                    for ($k = $limits[1]; $k <= $limits[2]; $k++)
-                                    {
+                                    for ($k = $limits[1]; $k <= $limits[2]; $k++) {
                                         // if value is not already among the values of the rule
                                         // add it to the rule
                                         if (!in_array($k, $rules[$i])) {
@@ -1630,8 +1635,8 @@ class Zebra_Form_Date extends Zebra_Form_Control
                                 }
 
                                 // make sure to convert things like "01" to "1"
-                            } elseif ($rules[$i][$j] !== '*') {
-                                $rules[$i][$j] = (int)$rules[$i][$j];
+                            } elseif ($jValue !== '*') {
+                                $rules[$i][$j] = (int)$jValue;
                             }
                         }
 
@@ -1641,7 +1646,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
                     $this->disabled_dates[] = $rules;
 
                 }
-
+            }
         }
 
         // if calendar has direction restrictions
