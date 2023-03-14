@@ -129,6 +129,7 @@ class Zebra_Form
      */
     private array $variables;
     private array $form_properties;
+    private array $proxies_cache;
 
     /**
      *  Constructor of the class
@@ -177,7 +178,7 @@ class Zebra_Form
 
             'action'                    =>  ($action === '' ? $_SERVER['REQUEST_URI'] : $action),
             'assets_server_path'        =>  rtrim(__DIR__, '\\/') . DIRECTORY_SEPARATOR,
-            'assets_url'                =>  rtrim(str_replace('\\', '/', 'http' . (isset($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') ? 's' : '') . '://' . rtrim($_SERVER['HTTP_HOST'], '\\/') . '/' . substr(rtrim(dirname(__FILE__), '\\/'), strlen($_SERVER['DOCUMENT_ROOT']))), '\\/') . '/',
+            'assets_url'                =>  rtrim(str_replace('\\', '/', 'http' . (isset($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 's' : '') . '://' . rtrim($_SERVER['HTTP_HOST'], '\\/') . '/' . substr(rtrim(__DIR__, '\\/'), strlen($_SERVER['DOCUMENT_ROOT']))), '\\/') . '/',
             'attributes'                =>  $attributes,
             'auto_fill'                 =>  false,
             'captcha_storage'           =>  'cookie',
@@ -2435,7 +2436,7 @@ class Zebra_Form
                         if (method_exists($this, $actions[0])) {
 
                             // if the method was erroneous
-                            if (!call_user_func_array(array(&$this, $actions[0]), array_slice($actions, 1))) {
+                            if (!call_user_func_array(array(&$this, $actions[0]), array_values(array_slice($actions, 1)))) {
 
                                 // add error message to indicated error block
                                 $this->add_error($actions['block'], $actions['message']);
@@ -4493,7 +4494,7 @@ class Zebra_Form
                     $index = trim(str_replace('"', '', $items[0]));
 
                     // if there are more mime types attached
-                    if (strpos($items[1], '[') !== false) {
+                    if (str_contains($items[1], '[')) {
                         // convert to array
                         $value = array_diff(array_map('trim', explode(',', str_replace(array('[', ']', '"', '\/'), array('', '', '', '/'), $items[1]))), array(''));
                     }
@@ -4916,7 +4917,7 @@ class Zebra_Form
         $path = rtrim($upload_path, '\\/');
 
         // if upload folder does not have a trailing slash, add the trailing slash
-        $path .= (substr($path, -1) != DIRECTORY_SEPARATOR ? DIRECTORY_SEPARATOR : '');
+        $path .= (substr($path, -1) !== DIRECTORY_SEPARATOR ? DIRECTORY_SEPARATOR : '');
 
         // if
         if (
