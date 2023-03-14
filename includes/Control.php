@@ -42,7 +42,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      *
-     *  @access private
+     *  @access public
      */
     public function __construct()
     {
@@ -57,7 +57,6 @@ class Zebra_Form_Control extends XSS_Clean
         $this->private_attributes = array();
 
         $this->rules = array();
-
     }
 
     /**

@@ -337,7 +337,9 @@ class Zebra_Form
                     // if default value is not given as an array
                     // (makes sense for checkboxes when there may be multiple preselected values)
                     // make it an array
-                    if (!is_array($default)) $default = array($default);
+                    if (!is_array($default)) {
+                        $default = array($default);
+                    }
 
                 }
 
@@ -361,11 +363,11 @@ class Zebra_Form
                         ($type === 'radios' ? 'radio' : 'checkbox'), $name, $value,
                         (isset($default) && in_array($value, $default) ?
                             (isset($additional) ? array_merge($additional, array('checked' => 'checked')) : array('checked' => 'checked')) :
-                            (isset($additional) ? $additional :'')));
+                            (isset($additional) ? $additional : [])));
 
                     // if this is the first control in the array
                     // we will later need to return a reference to it
-                    if ($counter++ == 0) {
+                    if ($counter++ === 0) {
                         $pointer = &$obj;
                     }
 
@@ -402,7 +404,7 @@ class Zebra_Form
                 $arguments = array_slice(func_get_args(), 1);
 
                 // if name was not specified trigger an error
-                if (strlen(trim($arguments[0])) == 0) {
+                if (trim($arguments[0]) === '') {
                     trigger_error('Name is required for control of type ' . $class_name, E_USER_ERROR);
                 }
 
@@ -461,12 +463,10 @@ class Zebra_Form
                 // return the identifier to the newly created object
                 return $obj;
 
-            } else {
-
-                // if the class does not exist, trigger an error
-                trigger_error('Class ' . $class_name . ' does not exist', E_USER_ERROR);
-
             }
+
+            // if the class does not exist, trigger an error
+            trigger_error('Class ' . $class_name . ' does not exist', E_USER_ERROR);
         }
     }
 
@@ -1104,7 +1104,7 @@ class Zebra_Form
         require rtrim(__DIR__, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'languages/' . strtolower(trim($language)) . '.php';
 
         // make the language available in the control
-        $this->form_properties['language'] = $language;
+        $this->form_properties['language'] = LANGUAGE;
 
     }
 

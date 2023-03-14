@@ -54,7 +54,7 @@ class Zebra_Form_Captcha extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  This is the name of the variable to be used in the template file, containing
      *                                  the generated HTML for the control.
@@ -65,12 +65,12 @@ class Zebra_Form_Captcha extends Zebra_Form_Control
      *                                  echo $my_captcha;
      *                                  </code>
      *
-     *  @param  string  $attach_to      The <b>id</b> attribute of the {@link Zebra_Form_Text textbox} control to attach
+     *  @param string $attach_to      The <b>id</b> attribute of the {@link Zebra_Form_Text textbox} control to attach
      *                                  the CAPTCHA image to.
      *
      *  @return void
      */
-    function __construct($id, $attach_to, $storage = 'cookie')
+    public function __construct(string $id, string $attach_to, $storage = 'cookie')
     {
 
         // call the constructor of the parent class
@@ -111,11 +111,9 @@ class Zebra_Form_Captcha extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
-
-        return '<div class="captcha-container"><img src="' . $this->form_properties['assets_url'] . 'process.php?captcha=' . ($this->form_properties['captcha_storage'] == 'session' ? 2 : 1) . '&amp;nocache=' . time() . '" alt=""' . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '><a href="javascript:void(0)" title="' . $this->form_properties['language']['new_captcha'] . '">' . $this->form_properties['language']['new_captcha'] . '</a></div>';
-    
+        return '<div class="captcha-container"><img src="' . $this->form_properties['assets_url'] . 'process.php?captcha=' . ($this->form_properties['captcha_storage'] === 'session' ? 2 : 1) . '&amp;nocache=' . time() . '" alt=""' . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '><a href="javascript:void(0)" title="' . $this->form_properties['language']['new_captcha'] . '">' . $this->form_properties['language']['new_captcha'] . '</a></div>';
     }
     
 }

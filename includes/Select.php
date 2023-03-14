@@ -87,7 +87,7 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *  if you plan on adding/removing values dynamically, from JavaScript, you will have to call the
      *  {@link Zebra_Form_Control::disable_spam_filter() disable_spam_filter()} method to prevent that from happening!</samp>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be as specified by the <i>$id</i>
      *                                  argument.<br>
@@ -112,7 +112,7 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *                                  This argument can also be an array in case the <b>multiple</b> attribute is set
      *                                  and multiple options need to be preselected by default.
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#edef-SELECT select}
      *                                  controls (multiple, readonly, style, etc)
      *
@@ -148,12 +148,12 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *
      *                                  <b>id</b>, <b>name</b>
      *
-     *  @param  string  $default_other  The default value in the "other" field (if the "other" attribute is set to true,
+     *  @param string $default_other  The default value in the "other" field (if the "other" attribute is set to true,
      *                                  see above)
      *
      *  @return void
      */
-    function __construct($id, $default = '', $attributes = '', $default_other = '')
+    public function __construct(string $id, array|string $default = '', array $attributes = [], string $default_other = '')
     {
 
         // call the constructor of the parent class
@@ -216,7 +216,7 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *  <b>If the "multiple" attribute is not set, the first option will be always considered as the "nothing is selected"
      *  state of the control!</b>
      *
-     *  @param  array   $options    An associative array of options where the key is the value of the option and the
+     *  @param array $options    An associative array of options where the key is the value of the option and the
      *                              value is the actual text to be displayed for the option.
      *
      *                              <b>Option groups</b> can be set by giving an array of associative arrays as argument:
@@ -228,7 +228,7 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *                                  ));
      *                              </code>
      *
-     *  @param  boolean $overwrite  (Optional) By default, succesive calls of this method will appended the options
+     *  @param boolean $overwrite  (Optional) By default, succesive calls of this method will appended the options
      *                              given as arguments to the already existing options.
      *
      *                              Setting this argument to TRUE will instead overwrite the previously existing options.
@@ -237,45 +237,30 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *
      *  @return void
      */
-    function add_options($options, $overwrite = false)
+    public function add_options(array $options, bool $overwrite = false): void
     {
+        // get some properties of the select control
+        $attributes = $this->get_attributes(array('options', 'multiple'));
 
-        // continue only if parameter is an array
-        if (is_array($options)) {
-
-            // get some properties of the select control
-            $attributes = $this->get_attributes(array('options', 'multiple'));
-
-            // if there are no options so far AND
-            // we're not overwriting existing options AND
-            // the "multiple" attribute is not set
-            if (empty($attributes['options']) && $overwrite === false && !isset($attributes['multiple']))
-
-                // add the default value
-                // we'll replace the value with the appropriate language
-                $options = array('' => $this->form_properties['language']['select']) + $options;
-
-            // set the options attribute of the control
-            $this->set_attributes(array(
-                'options'   =>  ($overwrite ? $options : $attributes['options'] + $options),
-			));
-
-            // if we overwrite the options, we set a flag so the default "- select -" is not added if $options array is empty
-            $this->set_attributes(array(
-                'overwrite'   =>    $overwrite,
-            ));
-
-        // if options are not specified as an array
-        } else {
-
-            // trigger an error message
-            _zebra_form_show_error('
-                Selectable values for the <strong>' . $this->attributes['id'] . '</strong> control must be specified as
-                an array
-            ');
-
+        // if there are no options so far AND
+        // we're not overwriting existing options AND
+        // the "multiple" attribute is not set
+        if (empty($attributes['options']) && $overwrite === false && !isset($attributes['multiple']))
+        {
+            // we'll replace the value with the appropriate language
+            // add the default value
+            $options = array('' => $this->form_properties['language']['select']) + $options;
         }
 
+        // set the options attribute of the control
+        $this->set_attributes(array(
+            'options'   =>  ($overwrite ? $options : $attributes['options'] + $options),
+        ));
+
+        // if we overwrite the options, we set a flag so the default "- select -" is not added if $options array is empty
+        $this->set_attributes(array(
+            'overwrite'   =>    $overwrite,
+        ));
     }
 
     /**
@@ -285,24 +270,24 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         // get the options of the select control
         $attributes = $this->get_attributes(array('options', 'value', 'multiple', 'other', 'overwrite'));
 
         // if select box is not "multi-select" and the "other" attribute is set
-        if (!isset($attributes['multiple']) && isset($attributes['other']))
-
+        if (!isset($attributes['multiple']) && isset($attributes['other'])) {
             // add an extra options to the already existing ones
             $attributes['options'] += array('other' => $this->form_properties['language']['other']);
+        }
 
         // if the default value, as added when instantiating the object is still there
         // or if no options were specified
-        if (($key = array_search('#replace-with-language#', $attributes['options'])) !== false || (!$attributes['overwrite'] && empty($attributes['options'])))
-
+        if (($key = array_search('#replace-with-language#', $attributes['options'], true)) !== false || (!$attributes['overwrite'] && empty($attributes['options']))) {
             // put the label from the language file
             $attributes['options'][$key] = $this->form_properties['language']['select'];
+        }
 
         // use a private, recursive method to generate the select's content
         $optContent = $this->_generate($attributes['options'], $attributes['value']);
@@ -319,7 +304,7 @@ class Zebra_Form_Select extends Zebra_Form_Control
      *
      *  @access private
      */
-    private function _generate(&$options, &$selected, $level = 0)
+    private function _generate(&$options, &$selected, $level = 0): string
     {
 
         $content = '';

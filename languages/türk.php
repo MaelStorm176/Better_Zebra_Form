@@ -6,7 +6,7 @@
 * @author   Bülent Özden
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Temizle',
     'csrf_detected' => 'Gönderinizle ilgili bir sorun çıktı!<br>Olası nedenler arasında form gönderiminin çok uzun sürmesi ya da aynı işlemden ikinci kere yapılması olabilir.<br>Lütfen yeniden deneyiniz.',

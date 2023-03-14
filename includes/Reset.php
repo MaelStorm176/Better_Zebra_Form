@@ -31,7 +31,7 @@ class Zebra_Form_Reset extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -47,9 +47,9 @@ class Zebra_Form_Reset extends Zebra_Form_Control
      *                                  echo $my_reset;
      *                                  </code>
      *
-     *  @param  string  $caption        Caption of the reset button control.
+     *  @param string $caption        Caption of the reset button control.
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (size, readonly, style, etc)
      *
@@ -75,7 +75,7 @@ class Zebra_Form_Reset extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $caption, $attributes = '')
+    public function __construct(string $id, string $caption, array $attributes = [])
     {
     
         // call the constructor of the parent class
@@ -130,11 +130,9 @@ class Zebra_Form_Reset extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
-
-        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>';
-
+        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
     }
 
 }

@@ -7,7 +7,7 @@
 * @author       D3iti, WaKeMaTTa
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Limpiar',
     'csrf_detected' => '¡Hubo un problema con tu envio!<br>Probablemente el envio es demasido grande o es una petición duplicada. <br> Por favor, inténtalo de nuevo.',

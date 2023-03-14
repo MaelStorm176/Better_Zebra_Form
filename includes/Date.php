@@ -45,7 +45,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -61,7 +61,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *                                  echo $my_date;
      *                                  </code>
      *
-     *  @param  string  $default        (Optional) Default date, formatted according to {@link format() format}.
+     *  @param string $default        (Optional) Default date, formatted according to {@link format() format}.
      *
      *  @param  array   $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
@@ -90,7 +90,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $default = '', $attributes = '')
+    public function __construct(string $id, string $default = '', array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -191,7 +191,6 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 'id'                        =>  $id,
                 'value'                     =>  $default,
                 'class'                     =>  'control text date',
-
                 'always_visible'            =>  null,
                 'days'                      =>  null,
                 'days_abbr'                 =>  null,
@@ -256,17 +255,15 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $date->always_visible('$("#container")');
      *  </code>
      *
-     *  @param  string  $element    A jQuery selector pointing to an existing element from the page to be used as the
+     *  @param string $element    A jQuery selector pointing to an existing element from the page to be used as the
      *                              date picker's container.
      *
      *  @return void
      */
-    function always_visible($element)
+    public function always_visible(string $element): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('always_visible' => $element));
-
     }
 
     /**
@@ -280,21 +277,19 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $date->container('$("#container")');
      *  </code>
      *
-     *  @param  string  $element    A jQuery selector pointing to an existing element from the page to be used as the
+     *  @param  string $element    A jQuery selector pointing to an existing element from the page to be used as the
      *                              date picker's container.
      *
      *  By default, all date pickers are placed at the end of the <body> element
      *
+     *  @return void
      *  @since 2.9.8
      *
-     *  @return void
      */
-    function container($element)
+    public function container(string $element): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('container' => $element));
-
     }
 
     /**
@@ -309,7 +304,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  ));
      *  </code>
      *
-     *  @param  array   $custom_classes An array in the form of
+     *  @param  array $custom_classes An array in the form of
      *
      *                                  <code>
      *                                  array(
@@ -335,16 +330,14 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *                                  Default is FALSE, no custom classes
      *
+     *  @return void
      *  @since 2.9.8
      *
-     *  @return void
      */
-    function custom_classes($custom_classes)
+    public function custom_classes(array $custom_classes): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('custom_classes' => $custom_classes));
-
     }
 
     /**
@@ -362,22 +355,20 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $date->default_position('below');
      *  </code>
      *
-     *  @param  string  $position   The position of the date picker relative to the element it is attached to.
+     *  @param  string $position   The position of the date picker relative to the element it is attached to.
      *
      *                              Possible values are "above" and "below".
      *
      *                              Default is "above"
      *
-     *  @since 2.9.8
-     *
      *  @return void
+     *@since 2.9.8
+     *
      */
-    function default_position($position)
+    public function default_position(string $position): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('default_position' => $position));
-
     }
 
     /**
@@ -439,7 +430,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function direction($direction)
+    public function direction(mixed $direction): void
     {
 
         // set the date picker's attribute
@@ -477,7 +468,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $obj->disabled_dates(array('01 07 2012', '02 07 2012', '* 08 2012'));
      *  </code>
      *
-     *  @param  array   $disabled_dates     An array of strings representing disabled dates. Values in the string have
+     *  @param array $disabled_dates     An array of strings representing disabled dates. Values in the string have
      *                                      to be in the following format: "day month year weekday" where "weekday" is
      *                                      optional and can be 0-6 (Saturday to Sunday); The syntax is similar to
      *                                      cron's syntax: the values are separated by spaces and may contain * (asterisk)
@@ -487,7 +478,8 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function disabled_dates($disabled_dates) {
+    public function disabled_dates(array $disabled_dates): void
+    {
 
         // set the date picker's attribute
         $this->set_attributes(array('disabled_dates' => $disabled_dates));
@@ -510,17 +502,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function disable_zebra_datepicker() {
-
+    public function disable_zebra_datepicker(): void
+    {
         $this->set_attributes(array('disable_zebra_datepicker' => true));
-
     }
 
     /**
      *  Enables selection of specific dates or range of dates in the calendar, after dates have been previously disabled
      *  via {@link disabled_dates()}.
      *
-     *  @param  array   $enabled_dates      An array of enabled dates in the same format as required for as argument for
+     *  @param  array $enabled_dates      An array of enabled dates in the same format as required for as argument for
      *                                      the {@link disabled_dates()} method. To be used together with
      *                                      {@link disabled_dates()} by first setting "disabled_dates" to something like
      *                                      array('* * * *') (which will disable everything) and then setting "enabled_dates"
@@ -529,38 +520,35 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *                                      Default is FALSE, all dates are enabled (unless, specificaly disabled via
      *                                      {@link disabled_dates()}).
      *
+     *  @return void
      *  @since 2.9.3
      *
-     *  @return void
      */
-    function enabled_dates($enabled_dates) {
-
+    public function enabled_dates(array $enabled_dates): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('enabled_dates' => $enabled_dates));
-
     }
 
     /**
      *  Week's starting day.
      *
-     *  @param  integer $day    Valid values are 0 to 6, Sunday to Saturday.
+     *  @param integer $day    Valid values are 0 to 6, Sunday to Saturday.
      *
      *                          Default is 1, Monday.
      *
      *  @return void
      */
-    function first_day_of_week($day)
+    public function first_day_of_week(int $day): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('first_day_of_week' => $day));
-
     }
 
     /**
      *  Sets the format of the returned date.
      *
-     *  @param  string  $format     Format of the returned date.
+     *  @param string $format     Format of the returned date.
      *
      *                              Accepts the following characters for date formatting: d, D, j, l, N, w, S, F, m, M,
      *                              n, Y, y borrowing syntax from ({@link http://www.php.net/manual/en/function.date.php
@@ -578,11 +566,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function format($format) {
-
+    public function format(string $format): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('format' => $format));
-
     }
 
     /**
@@ -594,14 +581,12 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  @return string  Returns submitted date in the YYYY-MM-DD format, or <b>an empty string</b> if control was
      *                  submitted with no value (empty).
      */
-    function get_date()
+    public function get_date(): string
     {
-
         $result = $this->get_attributes('date');
 
         // if control had a value return it, or return an empty string otherwise
-        return (isset($result['date'])) ? $result['date'] : '';
-
+        return $result['date'] ?? '';
     }
 
     /**
@@ -637,35 +622,31 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  ));
      *  </code>
      *
-     *  @param  $captions   An associative array containing captions in the datepicker's header, for the 3 possible
+     *  @param array $captions   * An associative array containing captions in the datepicker's header, for the 3 possible
      *                      views: days, months, years.
      *
      *  @return void
      */
-    function header_captions($captions)
+    public function header_captions(array $captions): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('header_captions' => $captions));
-
     }
 
     /**
      *  Sets the HTML to be used for the previous month/next month buttons.
      *
-     *  @param $navigation  An array with 2 elements containing the HTML to be used for the previous month/next month
+     *  @param $navigation   * An array with 2 elements containing the HTML to be used for the previous month/next month
      *                      buttons.
      *
      *                      Default is array('&#171;','&#187;')
      *
      *  @return void
      */
-    function header_navigation($navigation)
+    public function header_navigation($navigation): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('header_navigation' => $navigation));
-
     }
 
     /**
@@ -678,7 +659,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $date->icon_position('left');
      *  </code>
      *
-     *  @param  string  $position   The position of the date picker's inside the element it is attached to.
+     *  @param string $position   The position of the date picker's inside the element it is attached to.
      *
      *                              Possible values are "left" and "right".
      *
@@ -688,18 +669,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function icon_position($position)
+    public function icon_position(string $position): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('icon_position' => $position));
-
     }
 
     /**
      *  Sets whether the icon for opening the datepicker should be inside or outside the element.
      *
-     *  @param  boolean $value      If set to FALSE, the icon will be placed to the right of the parent element, while
+     *  @param boolean $value      If set to FALSE, the icon will be placed to the right of the parent element, while
      *                              if set to TRUE it will be placed to the right of the parent element, but *inside* the
      *                              element itself.
      *
@@ -707,47 +686,44 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function inside($value) {
-
+    public function inside(bool $value): void
+    {
         // set the date picker's attribute
         // ("inside" is a "reserved" attribute so we'll pick something else)
         $this->set_attributes(array('inside_icon' => $value));
-
     }
 
     /**
      *  Sets the offset, in pixels (x, y), to shift the date picker’s position relative to the top-left of the icon that
      *  toggles the date picker.
      *
-     *  @param  array  $value       An array indicating the offset, in pixels (x, y), to shift the date picker’s position
+     *  @param array $value       An array indicating the offset, in pixels (x, y), to shift the date picker’s position
      *                              relative to the top-left of the icon that toggles the date picker.
      *
      *                              Default is array(5, -5).
      *
      *  @return void
      */
-    function offset($value) {
-
+    public function offset(array $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('offset' => $value));
-
     }
 
     /**
      *  Sets whether the date picker should be shown *only* when clicking the icon.
      *
-     *  @param  array  $value       An array indicating the offset, in pixels (x, y), to shift the date picker’s position
+     *  @param array $value       An array indicating the offset, in pixels (x, y), to shift the date picker’s position
      *                              relative to the top-left of the icon that toggles the date picker.
      *
      *                              Default is FALSE.
      *
      *  @return void
      */
-    function open_icon_only($value) {
-
+    public function open_icon_only(array $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('open_icon_only' => $value));
-
     }
 
     /**
@@ -773,7 +749,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  $date2->direction(1);   
      *  </code>
      *
-     *  @param  string  $value      The ID of another "date" element which will use the current date element's value as
+     *  @param string $value      The ID of another "date" element which will use the current date element's value as
      *                              starting date.
      *
      *                              Note that the rules set in the "direction" property will still apply, only that the
@@ -784,17 +760,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function pair($value) {
-
+    public function pair(string $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('pair' => '$(\'#' . $value . '\')'));
-
     }
 
     /**
      *  Sets whether the element the calendar is attached to should be read-only.
      *
-     *  @param  boolean $value      The setting's value
+     *  @param boolean $value      The setting's value
      *
      *                              If set to TRUE, a date can be set only through the date picker and cannot be enetered
      *                              manually.
@@ -803,17 +778,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function readonly_element($value) {
-
+    public function readonly_element(bool $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('readonly_element' => $value));
-
     }
 
     /**
      *  Should days from previous and/or next month be selectable when visible?
      *
-     *  @param  string  $value      The setting's value
+     *  @param string $value      The setting's value
      *
      *                              Note that if set to TRUE, the value of {@link show_other_months()} will be considered
      *                              TRUE regardless of the actual value!
@@ -824,17 +798,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function select_other_months($value) {
-
+    public function select_other_months(string $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('select_other_months' => $value));
-
     }
 
     /**
      *  Should the "Clear date" button be visible?
      *
-     *  @param  string  $value      The setting's value
+     *  @param int|string $value      The setting's value
      *
      *                              Accepted values are:
      *
@@ -852,12 +825,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function show_clear_date($value = 0)
+    public function show_clear_date(int|string $value = 0): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('show_clear_date' => $value));
-
     }
 
     /**
@@ -875,22 +846,20 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *                              Default is TRUE
      *
+     *  @return void
      *  @since 2.9.8
      *
-     *  @return void
      */
-    function show_icon($visible)
+    public function show_icon(bool $visible): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('show_icon' => $visible));
-
     }
 
     /**
      *  Should days from previous and/or next month be visible?
      *
-     *  @param  string  $value      The setting's value
+     *  @param bool $value      The setting's value
      *
      *                              Default is TRUE.
      *
@@ -898,17 +867,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function show_other_months($value = true) {
-
+    public function show_other_months(bool $value = true): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('show_other_months' => $value));
-
     }
 
     /**
      *  Should the "Today" button be visible?
      *
-     *  @param  string  $value      The setting's value
+     *  @param string $value      The setting's value
      *
      *                              Setting this property to anything but a boolean FALSE will enable the button and
      *                              will use the property's value as caption for the button; setting it to FALSE will
@@ -920,18 +888,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function show_select_today($value = 'Today')
+    public function show_select_today(string $value = 'Today'): void
     {
-
         // set the date picker's attribute
         $this->set_attributes(array('show_select_today' => $value));
-
     }
 
     /**
      *  Sets whether an extra column should be shown, showing the number of each week.
      *
-     *  @param  string  $value      Anything other than FALSE will enable this feature, and use the given value as column
+     *  @param string $value      Anything other than FALSE will enable this feature, and use the given value as column
      *                              title. For example, show_week_number: ‘Wk’ would enable this feature and have "Wk" as
      *                              the column’s title.
      *
@@ -939,17 +905,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function show_week_number($value) {
-
+    public function show_week_number(string $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('show_week_number' => $value));
-
     }
 
     /**
      *  Sets a default date to start the date picker with.
      *
-     *  @param  date    $value      A default date to start the date picker with,
+     *  @param string $value      A default date to start the date picker with in the format defined by the "format" property.
      *
      *                              Must be specified in the format defined by the "format" property, or it will be
      *                              ignored!
@@ -961,18 +926,17 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function start_date($value) {
-
+    public function start_date(string $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('start_date' => $value));
-
     }
 
     /**
      *  Sets whether default values, in the input field the date picker is attached to, be deleted if they are not valid
      *  according to {@link direction() direction} and/or {@link disabled_dates() disabled_dates}.
      *
-     *  @param  boolean $value      If set to TRUE, default values, in the input field the date picker is attached to,
+     *  @param boolean $value      If set to TRUE, default values, in the input field the date picker is attached to,
      *                              will be deleted if they are not valid according to {@link direction() direction}
      *                              and/or {@link disabled_dates() disabled_dates}.
      *
@@ -980,19 +944,18 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function strict($value) {
-
+    public function strict(bool $value): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('strict' => $value));
-
     }
 
     /**
      *  Sets how should the date picker start.
      *
-     *  @param  string  $view       How should the date picker start.
+     *  @param string $view       How should the date picker start.
      *
-     *                              Valid values are "days", "months" and "years".
+     *                              Valid values are <strong>"days", "months" and "years"</strong>.
      *
      *                              Note that the date picker is always cycling days-months-years when clicking in the
      *                              date picker's header, and years-months-days when selecting dates (unless one or more
@@ -1006,11 +969,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function view($view) {
-
+    public function view(string $view): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('view' => $view));
-
     }
 
     /**
@@ -1024,27 +986,25 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return void
      */
-    function weekend_days($days) {
-
+    public function weekend_days($days): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('weekend_days' => $days));
-
     }
 
     /**
      *  Should day numbers < 10 be padded with zero?
      *
-     *  @param  boolean $state      When set to TRUE, day numbers < 10 will be prefixed with 0.
+     *  @param boolean $state      When set to TRUE, day numbers < 10 will be prefixed with 0.
      *
      *                              Default is FALSE.
      *
      *  @return void
      */
-    function zero_pad($state) {
-
+    public function zero_pad(bool $state): void
+    {
         // set the date picker's attribute
         $this->set_attributes(array('zero_pad' => $state));
-
     }
 
     /**
@@ -1054,15 +1014,17 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         // all date controls must have the "date" rule set or we trigger an error
-        if (!isset($this->rules['date'])) Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"date"</em> rule set', E_USER_ERROR);
+        if (!isset($this->rules['date'])) {
+            Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"date"</em> rule set', E_USER_ERROR);
+        }
 
         return '
             <div>
-                <input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>
+                <input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>
                 <div class="clear"></div>
             </div>
         ';
@@ -1081,7 +1043,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *
      *  @access private
      */
-    function _init()
+    private function _init(): array
     {
 
         // do these calculations only once
@@ -1094,11 +1056,15 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
             // calendar is future-only, starting today
             // it means we have a starting date (the current system date), but no ending date
-            if ($this->attributes['direction'] === true) $this->first_selectable_date = $system_date;
+            if ($this->attributes['direction'] === true) {
+                $this->first_selectable_date = $system_date;
+            }
 
             // calendar is past only, ending today
             // it means we have an ending date (the reference date), but no starting date
-            else if ($this->attributes['direction'] === false) $this->last_selectable_date = $system_date;
+            else if ($this->attributes['direction'] === false) {
+                $this->last_selectable_date = $system_date;
+            }
 
             else if (
 
@@ -1129,22 +1095,28 @@ class Zebra_Form_Date extends Zebra_Form_Control
             ) {
 
                 // if an exact starting date was given, use that as a starting date
-                if (isset($tmp_start_date)) $this->first_selectable_date = $tmp_start_date;
+                if (isset($tmp_start_date)) {
+                    $this->first_selectable_date = $tmp_start_date;
+                }
 
                 // otherwise
                 else
-
+                {
                     // figure out the starting date
                     $this->first_selectable_date = strtotime('+' . (!is_array($this->attributes['direction']) ? (int)($this->attributes['direction']) : (int)($this->attributes['direction'][0] === true ? 0 : $this->attributes['direction'][0])) . ' day', $system_date);
+                }
 
                 // if an exact ending date was given and the date is after the starting date, use that as a ending date
-                if (isset($tmp_end_date) && $tmp_end_date >= $this->first_selectable_date) $this->last_selectable_date = $tmp_end_date;
+                if (isset($tmp_end_date) && $tmp_end_date >= $this->first_selectable_date) {
+                    $this->last_selectable_date = $tmp_end_date;
+                }
 
                 // if have information about the ending date
                 else if (!isset($tmp_end_date) && $this->attributes['direction'][1] !== false && is_array($this->attributes['direction']))
-
+                {
                     // figure out the ending date
                     $this->last_selectable_date = strtotime('+' . (int)($this->attributes['direction'][1]) . ' day', $system_date);
+                }
 
             } else if (
 
@@ -1174,13 +1146,16 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 $this->last_selectable_date = strtotime('+' . (!is_array($this->attributes['direction']) ? (int)($this->attributes['direction']) : (int)($this->attributes['direction'][0] === false ? 0 : $this->attributes['direction'][0])) . ' day', $system_date);
 
                 // if an exact starting date was given, and the date is before the ending date, use that as a starting date
-                if (isset($tmp_start_date) && $tmp_start_date < $this->last_selectable_date) $this->first_selectable_date = $tmp_start_date;
+                if (isset($tmp_start_date) && $tmp_start_date < $this->last_selectable_date) {
+                    $this->first_selectable_date = $tmp_start_date;
+                }
 
                 // if have information about the starting date
                 else if (!isset($tmp_start_date) && is_array($this->attributes['direction']))
-
+                {
                     // figure out the staring date
                     $this->first_selectable_date = strtotime('-' . (int)($this->attributes['direction'][1]) . ' day');
+                }
 
             }
 
@@ -1205,16 +1180,20 @@ class Zebra_Form_Date extends Zebra_Form_Control
             }
 
             // if a first selectable date exists but is disabled, find the actual first selectable date
-            if (isset($this->first_selectable_date) && $this->_is_disabled($first_selectable_year, $first_selectable_month, $first_selectable_day)) {
+            if (isset($this->first_selectable_date, $first_selectable_day, $first_selectable_month, $first_selectable_year) && $this->_is_disabled($first_selectable_year, $first_selectable_month, $first_selectable_day)) {
 
                 // loop until we find the first selectable year
                 while ($this->_is_disabled($first_selectable_year)) {
 
                     // if calendar is past-only, decrement the year
-                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) $first_selectable_year--;
+                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) {
+                        $first_selectable_year--;
+                    }
 
                     // otherwise, increment the year
-                    else $first_selectable_year++;
+                    else {
+                        $first_selectable_year++;
+                    }
 
                     // because we've changed years, reset the month to January
                     $first_selectable_month = 1;
@@ -1225,10 +1204,14 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 while ($this->_is_disabled($first_selectable_year, $first_selectable_month)) {
 
                     // if calendar is past-only, decrement the month
-                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) $first_selectable_month--;
+                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) {
+                        $first_selectable_month--;
+                    }
 
                     // otherwise, increment the month
-                    else $first_selectable_month++;
+                    else {
+                        $first_selectable_month++;
+                    }
 
                     // if we moved to a following year
                     if ($first_selectable_month > 12) {
@@ -1257,12 +1240,17 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
                 // loop until we find the first selectable day
                 while ($this->_is_disabled($first_selectable_year, $first_selectable_month, $first_selectable_day))
-
+                {
                     // if calendar is past-only, decrement the day
-                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) $first_selectable_day--;
+                    if ($this->first_selectable_date < 0 || $this->first_selectable_date === false) {
+                        $first_selectable_day--;
+                    }
 
                     // otherwise, increment the day
-                    else $first_selectable_day++;
+                    else {
+                        $first_selectable_day++;
+                    }
+                }
 
                 // use mktime() to normalize the date
                 // for example, 2011 05 33 will be transformed to 2011 06 02
@@ -1278,7 +1266,7 @@ class Zebra_Form_Date extends Zebra_Form_Control
             }
 
             // save first and last selectable dates, as UNIX timestamps (or "0" if does not apply)
-            $this->limits = array(isset($this->first_selectable_date) ? $this->first_selectable_date : 0, isset($this->last_selectable_date) ? $this->last_selectable_date : 0);
+            $this->limits = array($this->first_selectable_date ?? 0, $this->last_selectable_date ?? 0);
 
         }
 
@@ -1288,14 +1276,14 @@ class Zebra_Form_Date extends Zebra_Form_Control
     }
 
     /**
-     *  Checks if the enetered value is a valid date in the right format.
+     *  Checks if the entered value is a valid date in the right format.
      *
-     *  @return mixed   Returns the UNIX timestamp of the checked date, if the date has the correct format,
+     *  @return false|int   Returns the UNIX timestamp of the checked date, if the date has the correct format,
      *                  or FALSE otherwise.
      *
      *  @access private
      */
-    function _is_format_valid($date)
+    private function _is_format_valid($date): bool|int
     {
 
         // the format we expect the date to be
@@ -1318,12 +1306,14 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 case 'd': $regexp[] = '0[1-9]|[12][0-9]|3[01]'; break;
 
                 // a textual representation of a day, three letters, mon through sun
+                case 'M':
                 case 'D': $regexp[] = '[a-z]{3}'; break;
 
                 // day of the month without leading zeros, 1 to 31
                 case 'j': $regexp[] = '[1-9]|[12][0-9]|3[01]'; break;
 
                 // a full textual representation of the day of the week, sunday through saturday
+                case 'F':
                 case 'l': $regexp[] = '[a-z]+'; break;
 
                 // ISO-8601 numeric representation of the day of the week (added in PHP 5.1.0), 1 (for Monday) through 7 (for Sunday)
@@ -1335,14 +1325,8 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 // numeric representation of the day of the week, 0 (for sunday) through 6 (for saturday)
                 case 'w': $regexp[] = '[0-6]'; break;
 
-                // a full textual representation of a month, such as january or march
-                case 'F': $regexp[] = '[a-z]+'; break;
-
                 // numeric representation of a month, with leading zeros, 01 through 12
                 case 'm': $regexp[] = '0[1-9]|1[012]+'; break;
-
-                // a short textual representation of a month, three letters, jan through dec
-                case 'M': $regexp[] = '[a-z]{3}'; break;
 
                 // numeric representation of a month, without leading zeros, 1 through 12
                 case 'n': $regexp[] = '[1-9]|1[012]'; break;
@@ -1370,13 +1354,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
 				case 'A': $regexp[] = '(am|pm)'; break;
 
                 // minutes with leading zeros, 00 to 59
-				case 'i': $regexp[] = '[0-5][0-9]'; break;
-
-                // seconds, with leading zeros 00 through 59
-				case 's': $regexp[] = '[0-5][0-9]'; break;
-
+                case 's':
+                case 'i': $regexp[] = '[0-5][0-9]'; break;
             }
-
         }
 
         // if format is defined
@@ -1394,9 +1374,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
             // iterate through the characters
             foreach ($matches[0] as $index => $char)
-
+            {
                 // and replace them with the appropriate regular expression
                 $format = substr_replace($format, '(' . $regexp[$chars - $index - 1] . ')', $matches[0][$index][1], 1);
+            }
 
             // the final regular expression to math the date against
             $format = '/^' . str_replace('/', '\/', $format) . '$/i';
@@ -1455,10 +1436,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
                             $valid = false;
 
                             // iterate through the values in the language file
-                            foreach ($this->form_properties['language'][($match[0] == 'F' || $match[0] == 'M' ? 'months' : 'days')] as $key => $value) {
+                            foreach ($this->form_properties['language'][($match[0] === 'F' || $match[0] === 'M' ? 'months' : 'days')] as $key => $value) {
 
                                 // if value matches the value from the language file
-                                if (strtolower($segments[$index + 1]) == strtolower(substr($value, 0, ($match[0] == 'D' || $match[0] == 'M' ? 3 : strlen($value))))) {
+                                if (stripos($value, strtolower($segments[$index + 1])) === 0) {
 
                                     // replace with the english value
                                     // this is because later on we'll run strtotime of the entered value and strtotime parses english dates
@@ -1480,7 +1461,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
                             }
 
                             // if an invalid was found don't look any further
-                            if (!$valid) break 2;
+                            if (!$valid) {
+                                break 2;
+                            }
 
                             break;
 
@@ -1541,20 +1524,26 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 if ($valid) {
 
                     // if date format does not include day, make day = 1
-                    if ($original_day == 0) $original_day = 1;
+                    if ($original_day === 0) {
+                        $original_day = 1;
+                    }
 
                     // if date format does not include month, make month = 0 (January)
-                    if ($original_month == 0) $original_month = 0;
+                    if ($original_month === 0) {
+                        $original_month = 0;
+                    }
 
                     // if date format does not include year, use the current year
-                    if ($original_year == 0) $original_year = date('Y');
+                    if ($original_year === 0) {
+                        $original_year = date('Y');
+                    }
 
                     // if date is still valid after we process it with strtotime
                     // (we do this because, so far, a date like "Feb 31 2010" would be valid
                     // but strtotime would turn that to "Mar 03 2010")
                     if (
 
-                        $english_months[$original_month] . ' ' . str_pad($original_day, 2, '0', STR_PAD_LEFT) . ', ' . $original_year ==
+                        $english_months[$original_month] . ' ' . str_pad($original_day, 2, '0', STR_PAD_LEFT) . ', ' . $original_year ===
                         date('F d, Y', strtotime($english_months[$original_month] . ' ' . $original_day . ', ' . $original_year))
 
                     ) {
@@ -1564,13 +1553,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
                         $this->attributes['date'] = $original_year . '-' . str_pad($original_month + 1, 2, '0', STR_PAD_LEFT) . '-' . str_pad($original_day, 2, '0', STR_PAD_LEFT);
 
                         return strtotime($original_year . '-' . ($original_month + 1) . '-' . $original_day);
-
                     }
-
                 }
-
             }
-
         }
 
         // if script gets this far, return FALSE as something must've been wrong
@@ -1582,15 +1567,15 @@ class Zebra_Form_Date extends Zebra_Form_Control
      *  Checks if, according to the restrictions of the calendar and/or the values defined by the "disabled_dates"
      *  property, a day, a month or a year needs to be disabled.
      *
-     *  @param  integer     $year   The year to check
-     *  @param  integer     $month  The month to check
-     *  @param  integer     $day    The day to check
+     * @param integer $year The year to check
+     * @param int|null $month The month to check
+     * @param int|null $day The day to check
      *
-     *  @return boolean         Returns TRUE if the given value is not disabled or FALSE otherwise
+     * @return boolean         Returns TRUE if the given value is not disabled or FALSE otherwise
      *
-     *  @access private
+     * @access private
      */
-    function _is_disabled($year, $month = '', $day = '')
+    function _is_disabled(int $year, int $month = null, int $day = null): bool
     {
 
         // parse the rules for disabling dates and turn them into arrays of arrays
@@ -1620,10 +1605,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
                         $rules[$i] = (strpos($rules[$i], ',') !== false ? explode(',', $rules[$i]) : (array)$rules[$i]);
 
                         // iterate through the items in the rule
-                        for ($j = 0; $j < count($rules[$i]); $j++)
-
+                        for ($j = 0, $jMax = count($rules[$i]); $j < $jMax; $j++)
+                        {
                             // if item contains a dash (defining a range)
-                            if (strpos($rules[$i][$j], '-') !== false) {
+                            if (str_contains($rules[$i][$j], '-')) {
 
                                 // get the lower and upper limits of the range
                                 // if range is valid
@@ -1634,15 +1619,21 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
                                     // iterate through the range
                                     for ($k = $limits[1]; $k <= $limits[2]; $k++)
-
+                                    {
                                         // if value is not already among the values of the rule
                                         // add it to the rule
-                                        if (!in_array($k, $rules[$i])) $rules[$i][] = (int)$k;
+                                        if (!in_array($k, $rules[$i])) {
+                                            $rules[$i][] = (int)$k;
+                                        }
+                                    }
 
                                 }
 
-                            // make sure to convert things like "01" to "1"
-                            } elseif ($rules[$i][$j] != '*') $rules[$i][$j] = (int)$rules[$i][$j];
+                                // make sure to convert things like "01" to "1"
+                            } elseif ($rules[$i][$j] !== '*') {
+                                $rules[$i][$j] = (int)$rules[$i][$j];
+                            }
+                        }
 
                     }
 
@@ -1677,10 +1668,10 @@ class Zebra_Form_Date extends Zebra_Form_Control
             }
 
             // normalize and merge arguments then transform the result to an integer
-            $now = $year . ($month != '' ? str_pad($month, 2, '0', STR_PAD_LEFT) : '') . ($day != '' ? str_pad($day, 2, '0', STR_PAD_LEFT) : '');
+            $now = $year . ($month !== null ? str_pad($month, 2, '0', STR_PAD_LEFT) : '') . ($day !== null ? str_pad($day, 2, '0', STR_PAD_LEFT) : '');
 
             // if we're checking days
-            if (strlen($now) == 8 && (
+            if ((
 
                 // day is before the first selectable date
                 (isset($this->first_selectable_date) && $now < $first_selectable_year . $first_selectable_month . $first_selectable_day) ||
@@ -1689,10 +1680,13 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 (isset($this->last_selectable_date) && $now > $last_selectable_year . $last_selectable_month . $last_selectable_day)
 
             // day needs to be disabled
-            )) return true;
+            ) && strlen($now) === 8) {
+                return true;
+            }
 
             // if we're checking months
-            else if (strlen($now) == 6 && (
+
+            if ((
 
                 // month is before the first selectable month
                 (isset($this->first_selectable_date) && $now < $first_selectable_year . $first_selectable_month) ||
@@ -1701,10 +1695,12 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 (isset($this->last_selectable_date) && $now > $last_selectable_year . $last_selectable_month)
 
             // month needs to be disabled
-            )) return true;
+            ) && strlen($now) === 6) {
+                return true;
+            }
 
             // if we're checking years
-            else if (strlen($now) == 4 && (
+            if ((
 
                 // year is before the first selectable year
                 (isset($this->first_selectable_date) && $now < $first_selectable_year) ||
@@ -1713,8 +1709,9 @@ class Zebra_Form_Date extends Zebra_Form_Control
                 (isset($this->last_selectable_date) && $now > $last_selectable_year)
 
             // year needs to be disabled
-            )) return true;
-
+            ) && strlen($now) === 4) {
+                return true;
+            }
         }
 
         // if there are rules for disabling dates
@@ -1726,44 +1723,35 @@ class Zebra_Form_Date extends Zebra_Form_Control
             // iterate through the rules for disabling dates
             foreach ($this->disabled_dates as $rule) {
 
-                // if the date is to be disabled, don't look any further
-                if ($disabled) return;
-
                 // if the rules apply for the current year
                 if (in_array($year, $rule[2]) || in_array('*', $rule[2], true))
-
+                {
                     // if the rules apply for the current month
-                    if (($month != '' && in_array($month, $rule[1])) || in_array('*', $rule[1], true))
-
+                    if (($month !== null && in_array($month, $rule[1])) || in_array('*', $rule[1], true)) {
                         // if the rules apply for the current day
-                        if (($day != '' && in_array($day, $rule[0])) || in_array('*', $rule[0], true)) {
-
-
+                        if (($day !== null && in_array($day, $rule[0])) || in_array('*', $rule[0], true)) {
                             // if day is to be disabled whatever the day
                             // don't look any further
-                            if (in_array('*', $rule[3], true)) return ($disabled = true);
+                            if (in_array('*', $rule[3], true)) {
+                                return ($disabled = true);
+                            }
 
                             // get the weekday
                             $weekday = date('w', mktime(12, 0, 0, $month, $day, $year));
 
                             // if weekday is to be disabled
                             // don't look any further
-                            if (in_array($weekday, $rule[3])) return ($disabled = true);
-
+                            if (in_array($weekday, $rule[3])) {
+                                return ($disabled = true);
+                            }
                         }
-
+                    }
+                }
             }
-
-            // if the day/month/year needs to be disabled
-            if ($disabled) return true;
-
         }
-
         // if script gets this far it means that the day/month/year doesn't need to be disabled
         return false;
-
     }
-
 }
 
 ?>

@@ -33,7 +33,7 @@ class Zebra_Form_Button extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -49,15 +49,15 @@ class Zebra_Form_Button extends Zebra_Form_Control
      *                                  echo $my_button;
      *                                  </code>
      *
-     *  @param  string  $caption        Caption of the button control.
+     *  @param string $caption        Caption of the button control.
      *
      *                                  Can be HTML markup.
      *
-     *  @param  string  $type           (Optional) Type of the button: button, submit or reset.
+     *  @param string $type           (Optional) Type of the button: button, submit or reset.
      *
      *                                  Default is "button".
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (size, readonly, style, etc)
      *
@@ -84,7 +84,7 @@ class Zebra_Form_Button extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $caption, $type = 'button', $attributes = '')
+    public function __construct(string $id, string $caption, string $type = 'button', array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -110,13 +110,13 @@ class Zebra_Form_Button extends Zebra_Form_Control
                 'name'  =>  $id,
                 'id'    =>  str_replace(array('[', ']'), '', $id),
                 'value' =>  $caption,
-                'class' =>  'button' . ($type != 'button' ? ' ' . $type : ''),
+                'class' =>  'button' . ($type !== 'button' ? ' ' . $type : ''),
             )
 
         );
 
         // if "class" is amongst user specified attributes
-        if (is_array($attributes) && isset($attributes['class'])) {
+        if (isset($attributes['class'])) {
 
             // we need to set the "class" attribute like this, so it doesn't overwrite previous values
             $this->set_attributes(array('class' => $attributes['class']), false);
@@ -138,10 +138,10 @@ class Zebra_Form_Button extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    function toHTML(): string
     {
 
-        return '<button ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>' . $this->attributes['value'] . '</button>';
+        return '<button ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>' . $this->attributes['value'] . '</button>';
 
     }
 

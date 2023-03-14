@@ -15,7 +15,8 @@
     ],
     "require": {
         "php": ">=8.1",
-        "ext-fileinfo": "*"
+        "ext-fileinfo": "*",
+      "ext-mbstring": "*"
     },
     "version": "2.9.8",
     "autoload": {

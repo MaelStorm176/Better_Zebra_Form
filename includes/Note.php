@@ -1,4 +1,4 @@
-<?php
++<?php
 
 /**
  *  Class for notes attached to controls
@@ -34,7 +34,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  This is the name of the variable to be used in the template file, containing
      *                                  the generated HTML for the control.
@@ -45,7 +45,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
      *                                  echo $my_note;
      *                                  </code>
      *
-     *  @param  string  $attach_to      The <b>id</b> attribute of the control to attach the note to.
+     *  @param string $attach_to      The <b>id</b> attribute of the control to attach the note to.
      *
      *                                  <i>Notice that this must be the "id" attribute of the control you are attaching
      *                                  the label to, and not the "name" attribute!</i>
@@ -62,9 +62,9 @@ class Zebra_Form_Note extends Zebra_Form_Control
      *                                  individual controls, this attribute must instead refer to the <b>name</b> of the
      *                                  controls (which, for groups of checkboxes/radio buttons, is one and the same). 
      *
-     *  @param  string  $caption        Content of the note (can be both plain text and/or HTML)
+     *  @param string $caption        Content of the note (can be both plain text and/or HTML)
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/struct/global.html#h-7.5.4 div}
      *                                  elements (style, etc)
      *
@@ -90,7 +90,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $attach_to, $caption, $attributes = '')
+    public function __construct(string $id, string $attach_to, string $caption, array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -127,7 +127,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
         );
 
         // if "class" is amongst user specified attributes
-        if (is_array($attributes) && isset($attributes['class'])) {
+        if (isset($attributes['class'])) {
 
             // we need to set the "class" attribute like this, so it doesn't overwrite previous values
             $this->set_attributes(array('class' => $attributes['class']), false);
@@ -149,7 +149,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         $attributes = $this->get_attributes('caption');

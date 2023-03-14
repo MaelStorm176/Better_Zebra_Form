@@ -148,7 +148,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @param  mixed   $value          Value of the checkbox.
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (disabled, readonly, style, etc)
      *
@@ -175,7 +175,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @return void
      */
-    public function __construct(string $id, mixed $value, $attributes = [])
+    public function __construct(string $id, mixed $value, array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -231,10 +231,10 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
-        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>';
+        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
 
     }
 

@@ -36,7 +36,7 @@ class Zebra_Form_File extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -52,7 +52,7 @@ class Zebra_Form_File extends Zebra_Form_Control
      *                                  echo $my_file_upload;
      *                                  </code>
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array|string $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (size, readonly, style, etc)
      *
@@ -79,7 +79,7 @@ class Zebra_Form_File extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $attributes = '')
+    public function __construct(string $id, array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -89,11 +89,9 @@ class Zebra_Form_File extends Zebra_Form_Control
         // these attributes are private for this control and are for internal use only
         // and will not be rendered by the _render_attributes() method
         $this->private_attributes = array(
-
             'disable_xss_filters',
             'locked',
             'files',
-
         );
 
         // set the default attributes for the text control
@@ -134,23 +132,25 @@ class Zebra_Form_File extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         // all file upload controls must have the "upload" rule set or we trigger an error
-        if (!isset($this->rules['upload'])) Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"upload"</em> rule set', E_USER_ERROR);
+        if (!isset($this->rules['upload'])) {
+            Zebra_Form::_zebra_form_show_error('The control named <strong>"' . $this->attributes['name'] . '"</strong> in form <strong>"' . $this->form_properties['name'] . '"</strong> must have the <em>"upload"</em> rule set', E_USER_ERROR);
+        }
 
         // if the "image" rule is set
-        if (isset($this->rules['image']))
-
+        if (isset($this->rules['image'])) {
             // these are the allowed file extensions
             $allowed_file_types = array('jpe', 'jpg', 'jpeg', 'png', 'gif');
+        }
 
         // if the "filetype" rule is set
-        elseif (isset($this->rules['filetype']))
-
+        elseif (isset($this->rules['filetype'])) {
             // get the array of allowed file extensions
             $allowed_file_types = array_map('trim', explode(',', $this->rules['filetype'][0]));
+        }
 
         // if file selection should be restricted to certain file types
         if (isset($allowed_file_types)) {
@@ -158,25 +158,23 @@ class Zebra_Form_File extends Zebra_Form_Control
             $mimes = array();
 
             // iterate through allowed extensions
-            foreach ($allowed_file_types as $extension)
-
+            foreach ($allowed_file_types as $extension) {
                 // get the mime type for each extension
-                if (isset($this->form_properties['mimes'][$extension]))
-
+                if (isset($this->form_properties['mimes'][$extension])) {
                     $mimes = array_merge($mimes, (array)$this->form_properties['mimes'][$extension]);
+                }
+            }
 
             // set the "accept" attribute
             // see http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#file-upload-state-%28type=file%29
-            // at the time of writing, on December 30, 2012, this was only working on Chrome 23 and IE 10
             $this->set_attributes(array('accept' => '.' . implode(',.', $allowed_file_types) . ',' . implode(',', $mimes)));
+            // at the time of writing, on December 30, 2012, this was only working on Chrome 23 and IE 10
 
         }
 
         // show the file upload control
-        $output = '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>';
-
         // return the generated output
-        return $output;
+        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
 
     }
 

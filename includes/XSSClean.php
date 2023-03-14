@@ -498,7 +498,7 @@ class XSS_Clean
 	 *
      *  @access private
 	 */
-	function _decode_entity(array $match): string
+	private function _decode_entity(array $match): string
     {
 		return $this->entity_decode($match[0], strtoupper('UTF-8'));
 	}

@@ -43,7 +43,7 @@ class Zebra_Form_Time extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -59,14 +59,14 @@ class Zebra_Form_Time extends Zebra_Form_Control
      *                                  echo $my_time;
      *                                  </code>
      *
-     *  @param  string  $default        (Optional) String representing the default time to be shown. Must be set according
+     *  @param string $default        (Optional) String representing the default time to be shown. Must be set according
      *                                  to the format of the time, as specified in <i>$attributes</i>. For example, for a
      *                                  time format of "hm", one would set the default time in the form of "hh:mm" while
      *                                  for a time format of "hms", one would set the time in the form of "hh:mm:ss".
      *
      *                                  Default is current system time.
      *
-     *  @param  array   $attributes     (Optional) An array of user specified attributes valid for an time picker
+     *  @param array $attributes     (Optional) An array of user specified attributes valid for an time picker
      *                                  control (format, hours, minutes, seconds, am/pm).
      *
      *                                  Must be specified as an associative array, in the form of <i>attribute => value</i>.
@@ -92,7 +92,7 @@ class Zebra_Form_Time extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $default = '', $attributes = '')
+    public function __construct(string $id, string $default = '', array $attributes = [])
     {
     
         // call the constructor of the parent class
@@ -102,10 +102,14 @@ class Zebra_Form_Time extends Zebra_Form_Control
         $hours = $minutes = $seconds = array();
 
         // all the 24 hours are available by default
-        for ($i = 0; $i < 24; $i++) $hours[] = $i;
+        for ($i = 0; $i < 24; $i++) {
+            $hours[] = $i;
+        }
 
         // all the minutes and seconds are available by default
-        for ($i = 0; $i < 60; $i++) $minutes[] = $seconds[] = $i;
+        for ($i = 0; $i < 60; $i++) {
+            $minutes[] = $seconds[] = $i;
+        }
 
         // set the private attributes of this control
         // these attributes are private for this control and are for internal use only
@@ -157,7 +161,7 @@ class Zebra_Form_Time extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         // get some attributes of the control
@@ -167,28 +171,33 @@ class Zebra_Form_Time extends Zebra_Form_Control
         $attributes['format'] = strtolower($attributes['format']);
 
         // if invalid format specified, revert to the default "hm"
-        if (preg_match('/^[hmsg]+$/i', $attributes['format']) == 0 || strlen(preg_replace('/([a-z]{2,})/i', '$1', $attributes['format'])) != strlen($attributes['format'])) $attributes['format'] = 'hm';
+        if (preg_match('/^[hmsg]+$/i', $attributes['format']) == 0 || strlen(preg_replace('/([a-z]{2,})/i', '$1', $attributes['format'])) !== strlen($attributes['format'])) {
+            $attributes['format'] = 'hm';
+        }
 
         // see what have we sepcified as default time
         $time = array_diff(explode(':', trim(str_replace(array('am', 'pm'), '', strtolower($attributes['value'])))), array(''));
 
         // if, according to the time format, we have to show the hours, and the hour is given in the default time
         if (($hour_position = strpos($attributes['format'], 'h')) !== false && isset($time[$hour_position]))
-
+        {
             // the default selected hour
             $selected_hour = $time[$hour_position];
+        }
 
         // if, according to the time format, we have to show the minutes, and the minutes are given in the default time
         if (($minutes_position = strpos($attributes['format'], 'm')) !== false && isset($time[$minutes_position]))
-
+        {
             // the default selected minute
             $selected_minute = $time[$minutes_position];
+        }
 
         // if, according to the time format, we have to show the seconds, and the seconds are given in the default time
         if (($seconds_position = strpos($attributes['format'], 's')) !== false && isset($time[$seconds_position]))
-
+        {
             // the default selected minute
             $selected_second = $time[$seconds_position];
+        }
 
         // if 12-hours format is to be used
         if (strpos($attributes['format'], 'g')) {
@@ -198,9 +207,10 @@ class Zebra_Form_Time extends Zebra_Form_Control
 
             // if this is also present in the default time
             if (preg_match('/\bam\b|\bpm\b/i', $attributes['value'], $matches))
-
+            {
                 // extract the format from the default time
                 $ampm = strtolower($matches[0]);
+            }
 
         }
 
@@ -215,13 +225,12 @@ class Zebra_Form_Time extends Zebra_Form_Control
                 <select name="' . $attributes['name'] . '_hours" id="' . $attributes['name'] . '_hours" ' . $this->_render_attributes() . '>
                     <option value="">-</option>';
 
-            foreach ($attributes['hours'] as $hour)
-
+            foreach ($attributes['hours'] as $hour) {
                 // show 12 or 24 hours depending on the format
-                if (!isset($ampm) || ($hour > 0 && $hour < 13))
-
-                    $output .= '<option value="' . str_pad($hour, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_hour) && ltrim($selected_hour, '0') == ltrim($hour, '0') ? '  selected="selected"' : '') . '>' . str_pad($hour, 2, '0', STR_PAD_LEFT) . '</option>';
-
+                if (!isset($ampm) || ($hour > 0 && $hour < 13)) {
+                    $output .= '<option value="' . str_pad($hour, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_hour) && ltrim($selected_hour, '0') === ltrim($hour, '0') ? '  selected="selected"' : '') . '>' . str_pad($hour, 2, '0', STR_PAD_LEFT) . '</option>';
+                }
+            }
             $output .= '
                 </select>
             ';
@@ -236,9 +245,9 @@ class Zebra_Form_Time extends Zebra_Form_Control
                 <select name="' . $attributes['name'] . '_minutes" id="' . $attributes['name'] . '_minutes" ' . $this->_render_attributes() . '>
                     <option value="">-</option>';
 
-            foreach ($attributes['minutes'] as $minute)
-
+            foreach ($attributes['minutes'] as $minute) {
                 $output .= '<option value="' . str_pad($minute, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_minute) && ltrim($selected_minute, '0') == ltrim($minute, '0') ? ' selected="selected"' : '') . '>' . str_pad($minute, 2, '0', STR_PAD_LEFT) . '</option>';
+            }
 
             $output .= '
                 </select>
@@ -254,9 +263,9 @@ class Zebra_Form_Time extends Zebra_Form_Control
                 <select name="' . $attributes['name'] . '_seconds" id="' . $attributes['name'] . '_seconds" ' . $this->_render_attributes() . '>
                     <option value="">-</option>';
 
-            foreach ($attributes['seconds'] as $second)
-
+            foreach ($attributes['seconds'] as $second) {
                 $output .= '<option value="' . str_pad($second, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_second) && ltrim($selected_second, '0') == ltrim($second, '0') ? ' selected="selected"' : '') . '>' . str_pad($second, 2, '0', STR_PAD_LEFT) . '</option>';
+            }
 
             $output .= '
                 </select>
