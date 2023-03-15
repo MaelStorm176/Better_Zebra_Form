@@ -10,11 +10,6 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
-  <component name="PhpIncludePathManager">
-    <include_path>
-      <path value="$PROJECT_DIR$/vendor/composer" />
-    </include_path>
-  </component>
   <component name="PhpInterpreters">
     <interpreters>
       <interpreter id="07b96273-a30c-449f-b635-89763f271287" name="Ubuntu" home="\\wsl$\Ubuntu/usr/bin/php" debugger_id="php.debugger.XDebug">
