@@ -6,7 +6,7 @@
 * @author       Chris Banford
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Löschen',
     'csrf_detected' => 'Beim Absenden des Formulars ist ein Problem aufgetreten.<br>Es kann sein, dass zu viel Zeit vergangen ist, oder dass Ihre Anfrage bereits gesendet wurde.<br>Bitte versuchen Sie es später noch einmal.',

@@ -34,7 +34,7 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  This is the name of the variable to be used in the template file, containing
      *                                  the generated HTML for the control.
@@ -45,7 +45,7 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *                                  echo $my_label;
      *                                  </code>
      *
-     *  @param  string  $attach_to      The <b>id</b> attribute of the control to attach the note to.
+     *  @param string $attach_to      The <b>id</b> attribute of the control to attach the note to.
      *
      *                                  <i>Notice that this must be the "id" attribute of the control you are attaching
      *                                  the label to, and not the "name" attribute!</i>
@@ -66,13 +66,13 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *                                  (the red asterisk) will be attached to the master label instead of being attached
      *                                  to the first checkbox/radio button from the group.
      *
-     *  @param  mixed   $caption        Caption of the label.
+     *  @param  string   $caption        Caption of the label.
      *
      *                                  <i>Putting a $ (dollar) sign before a character will turn that specific character into
      *                                  the accesskey.</i><br>
      *                                  <i>If you need the dollar sign in the label, escape it with</i> \ <i>(backslash)</i>
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#edef-LABEL label}
      *                                  elements (style, etc)
      *
@@ -117,7 +117,7 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $attach_to, $caption, $attributes = '')
+    public function __construct(string $id, string $attach_to, string $caption, array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -166,7 +166,7 @@ class Zebra_Form_Label extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
         // get private attributes

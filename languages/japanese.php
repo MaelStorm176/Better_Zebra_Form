@@ -1,6 +1,6 @@
 <?php
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => '日付を消す',
     'csrf_detected' => '送信に問題がありました。送信するまでの時間が長すぎるかもしれません。もしくは今送った送信リクエストが重複している為こちらのメッセージが表示されているかもしれません。また送信して下さい',

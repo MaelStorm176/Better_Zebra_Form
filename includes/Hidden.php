@@ -31,7 +31,7 @@ class Zebra_Form_Hidden extends Zebra_Form_Control
      *  $form->render();
      *  </code>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  The control's <b>name</b> attribute will be the same as the <b>id</b> attribute!
      *
@@ -42,11 +42,11 @@ class Zebra_Form_Hidden extends Zebra_Form_Control
      *                                  method is called!</b><br>
      *                                  <b>Do not print them in template files!</b>
      *
-     *  @param  string  $default        (Optional) Default value of the text box.
+     *  @param string $default        (Optional) Default value of the text box.
      *
      *  @return void
      */
-    function __construct($id, $default = '')
+    public function __construct(string $id, string $default = '')
     {
 
         // call the constructor of the parent class
@@ -56,10 +56,8 @@ class Zebra_Form_Hidden extends Zebra_Form_Control
         // these attributes are private for this control and are for internal use only
         // and will not be rendered by the _render_attributes() method
         $this->private_attributes = array(
-
             'disable_xss_filters',
             'locked',
-
         );
 
         // set the default attributes for the hidden control
@@ -74,7 +72,7 @@ class Zebra_Form_Hidden extends Zebra_Form_Control
 
                 'type'  =>  'hidden',
                 'name'  =>  $id,
-                'id'    =>  ($id != 'MAX_FILE_SIZE' ? str_replace(array('[', ']'), '', $id) : 'mfs_' . rand(0, 100000)),
+                'id'    =>  ($id !== 'MAX_FILE_SIZE' ? str_replace(array('[', ']'), '', $id) : 'mfs_' . random_int(0, 100000)),
                 'value' =>  $default,
 
             )
@@ -90,11 +88,9 @@ class Zebra_Form_Hidden extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
-
-        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>';
-
+        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
     }
 
 }

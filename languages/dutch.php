@@ -6,7 +6,7 @@
 * @author       Alexander Martens <martens@podium.nl>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Wissen',
     'csrf_detected' => 'Er was een probleem met het verzenden van het formulier<br>Of het versturen duurde te lang of uw formulier was inmiddels al verstuurd.<br>Probeer het later nog een keer.',

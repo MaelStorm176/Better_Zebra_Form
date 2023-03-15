@@ -19,7 +19,7 @@ class XSS_Clean
 	 *
      *  @access private
 	 */
-	var $_xss_hash =	'';
+	private string $_xss_hash =	'';
 
 	/**
 	 * List of never allowed strings
@@ -28,7 +28,7 @@ class XSS_Clean
 	 *
      *  @access private
 	 */
-	var $_never_allowed_str =	array(
+	private array $_never_allowed_str =	array(
 		'document.cookie'	=> '[removed]',
 		'document.write'	=> '[removed]',
 		'.parentNode'		=> '[removed]',
@@ -48,7 +48,7 @@ class XSS_Clean
 	 *
      *  @access private
 	 */
-	var $_never_allowed_regex = array(
+	private array $_never_allowed_regex = array(
 		'javascript\s*:',
 		'expression\s*(\(|&\#40;)', // CSS and IE
 		'vbscript\s*:', // IE, surprise!
@@ -81,12 +81,13 @@ class XSS_Clean
      *  To help develop this script I used this great list of vulnerabilities along with a few other hacks I've
      *  harvested from examining vulnerabilities in other programs: {@link http://ha.ckers.org/xss.html}
      *
-     *  @param  string  $str    String to be filtered
+     *  @param string $str    String to be filtered
+     *  @param bool $rawurldecode  Whether to run rawurldecode() on the string first
      *
      *  @return string          Returns filtered string
      */
-	function sanitize($str, $rawurldecode = true)
-	{
+	public function sanitize(string $str, bool $rawurldecode = true): string
+    {
 
 		// Remove Invisible Characters
 		$str = $this->_remove_invisible_characters($str);
@@ -100,7 +101,9 @@ class XSS_Clean
 		 *
 		 * Note: Use rawurldecode() so it does not remove plus signs
 		 */
-		if ($rawurldecode) $str = rawurldecode($str);
+		if ($rawurldecode) {
+            $str = rawurldecode($str);
+        }
 
 		/*
 		 * Convert character entities to ASCII
@@ -225,26 +228,28 @@ class XSS_Clean
 		// Final clean up
 		// This adds a bit of extra precaution in case
 		// something got through the above filters
-		$str = $this->_do_never_allowed($str);
-
-		return $str;
+        return $this->_do_never_allowed($str);
 	}
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Random Hash for protecting URLs
-	 *
-	 * @return	string
-	 *
-     *  @access private
-	 */
-	function xss_hash()
-	{
+    /**
+     * Random Hash for protecting URLs
+     *
+     * @return    string
+     *
+     * @access private
+     */
+	private function xss_hash(): string
+    {
 		if ($this->_xss_hash === '')
 		{
 			mt_srand();
-			$this->_xss_hash = md5(time() + mt_rand(0, 1999999999));
+            try {
+                $this->_xss_hash = md5(time() + random_int(0, 1999999999));
+            } catch (Exception $e){
+                die("Error: Cannot generate random number");
+            }
 		}
 
 		return $this->_xss_hash;
@@ -263,15 +268,15 @@ class XSS_Clean
 	 * correctly. html_entity_decode() does not convert entities without
 	 * semicolons, so we are left with our own little solution here. Bummer.
 	 *
-	 * @param	string
-	 * @param	string
+	 * @param	string $str
+	 * @param string|null $charset
 	 * @return	string
 	 *
      *  @access private
 	 */
-	function entity_decode($str, $charset = NULL)
-	{
-		if (strpos($str, '&') === FALSE)
+	private function entity_decode(string $str, string $charset = NULL): string
+    {
+		if (!str_contains($str, '&'))
 		{
 			return $str;
 		}
@@ -294,13 +299,13 @@ class XSS_Clean
 	 * Callback function for xss_clean() to remove whitespace from
 	 * things like j a v a s c r i p t
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param	array $matches * length 3
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _compact_exploded_words($matches)
-	{
+	private function _compact_exploded_words(array $matches): string
+    {
 		return preg_replace('/\s+/s', '', $matches[1]).$matches[2];
 	}
 
@@ -323,8 +328,8 @@ class XSS_Clean
 	 *
      *  @access private
 	 */
-	function _remove_evil_attributes($str, $is_image)
-	{
+	private function _remove_evil_attributes(string $str, bool $is_image): string
+    {
 		// All javascript event handlers (e.g. onload, onclick, onmouseover), style, and xmlns
 		$evil_attributes = array('on\w*', 'style', 'xmlns', 'formaction');
 
@@ -376,13 +381,13 @@ class XSS_Clean
 	 *
 	 * Callback function for xss_clean() to remove naughty HTML elements
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param array $matches * length 4
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _sanitize_naughty_html($matches)
-	{
+	private function _sanitize_naughty_html(array $matches): string
+    {
 		return '&lt;'.$matches[1].$matches[2].$matches[3] // encode opening brace
 			// encode captured opening or closing brace to prevent recursive vectors:
 			.str_replace(array('>', '<'), array('&gt;', '&lt;'), $matches[4]);
@@ -398,13 +403,13 @@ class XSS_Clean
 	 * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
 	 * PHP 5.2+ on link-heavy strings
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param array $match
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _js_link_removal($match)
-	{
+	private function _js_link_removal(array $match): string
+    {
 		return str_replace($match[1],
 					preg_replace('#href=.*?(?:alert\(|alert&\#40;|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si',
 							'',
@@ -423,13 +428,13 @@ class XSS_Clean
 	 * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
 	 * PHP 5.2+ on image tag heavy strings
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param array $match
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _js_img_removal($match)
-	{
+	private function _js_img_removal(array $match): string
+    {
 		return str_replace($match[1],
 					preg_replace('#src=.*?(?:alert\(|alert&\#40;|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
 							'',
@@ -445,13 +450,13 @@ class XSS_Clean
 	 *
 	 * Used as a callback for XSS Clean
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param array $match
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _convert_attribute($match)
-	{
+	private function _convert_attribute(array $match): string
+    {
 		return str_replace(array('>', '<', '\\'), array('&gt;', '&lt;', '\\\\'), $match[0]);
 	}
 
@@ -462,13 +467,13 @@ class XSS_Clean
 	 *
 	 * Filters tag attributes for consistency and safety
 	 *
-	 * @param	string
-	 * @return	string
+	 * @param string $str
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _filter_attributes($str)
-	{
+	private function _filter_attributes(string $str): string
+    {
 		$out = '';
 		if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches))
 		{
@@ -488,13 +493,13 @@ class XSS_Clean
 	 *
 	 * Used as a callback for XSS Clean
 	 *
-	 * @param	array
-	 * @return	string
+	 * @param array $match
+     * @return	string
 	 *
      *  @access private
 	 */
-	function _decode_entity($match)
-	{
+	private function _decode_entity(array $match): string
+    {
 		return $this->entity_decode($match[0], strtoupper('UTF-8'));
 	}
 
@@ -505,13 +510,13 @@ class XSS_Clean
 	 *
 	 * Called by xss_clean()
 	 *
-	 * @param 	string
-	 * @return 	string
+	 * @param string $str
+     * @return 	string
 	 *
      *  @access private
 	 */
-	function _validate_entities($str)
-	{
+	private function _validate_entities(string $str): string
+    {
 		/*
 		 * Protect GET variables in URLs
 		 */
@@ -547,13 +552,13 @@ class XSS_Clean
 	 *
 	 * A utility function for xss_clean()
 	 *
-	 * @param 	string
-	 * @return 	string
+	 * @param string $str
+     * @return 	string
 	 *
      *  @access private
 	 */
-	function _do_never_allowed($str)
-	{
+	private function _do_never_allowed(string $str): string
+    {
 		$str = str_replace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
 
 		foreach ($this->_never_allowed_regex as $regex)
@@ -571,11 +576,11 @@ class XSS_Clean
 	 * between ascii characters, like Java\0script.
 	 *
 	 * @access	private
-	 * @param	string
-	 * @return	string
+	 * @param string $str
+     * @return	string
 	 */
-	function _remove_invisible_characters($str)
-	{
+	private function _remove_invisible_characters(string $str): string
+    {
 		static $non_displayables;
 
 		if ( ! isset($non_displayables))

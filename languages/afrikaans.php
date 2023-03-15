@@ -6,7 +6,7 @@
 * @author       Shaun Adlam <ashaun@vodamail.co.za>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Maak datum skoon',
     'csrf_detected' => 'Daar was "n probleem met jou voorlegging ! <br> Moontlike oorsake kan wees dat die voorlegging te lank geneem het , of dit word dubbel versoek. <br> Probeer asseblief weer..',

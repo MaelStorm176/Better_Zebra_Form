@@ -66,9 +66,10 @@
         show_results();
 
     // otherwise
-    } else
-
+    } else {
+        echo '<h3>Form</h3>';
         // generate output using a custom template
         $form->render();
+    }
 
 ?>

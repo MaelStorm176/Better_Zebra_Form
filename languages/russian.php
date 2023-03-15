@@ -6,7 +6,7 @@
 * @author Maxim Hodyrev <maximkou@gmail.com>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Дата очистки',
     'csrf_detected' => 'При выполнении вашего запроса возникла проблема.<br>Возможно, ваш запрос занял слишком много времени или дублируется.<br>Попробуйте еще раз.',

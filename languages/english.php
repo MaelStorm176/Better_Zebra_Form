@@ -6,7 +6,7 @@
 * @author       Stefan Gabos <contact@stefangabos.ro>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Clear date',
     'csrf_detected' => 'There was a problem with your submission!<br>Possible causes may be that the submission has taken too long, or it represents a duplicate request.<br>Please try again.',

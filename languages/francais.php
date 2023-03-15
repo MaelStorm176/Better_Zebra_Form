@@ -7,7 +7,7 @@
 * @author       Sébastien GASTARD aka Gafa
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Vider',
     'csrf_detected' =>' Il y a eu un problème avec cette requête<br>Cela peut être causé par une inactivité de votre part, ou par un double envoi du formulaire.<br>Merci de réessayer plus tard. ',

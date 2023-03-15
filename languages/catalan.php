@@ -7,7 +7,7 @@
 * @author       WaKeMaTTa
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Netejar',
     'csrf_detected' => 'Hi va haver un problema amb el teu enviament! <br> Probablement l\'enviament és massa gran o és una petició duplicada. <br> Si us plau, torneu a provar.',

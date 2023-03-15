@@ -117,7 +117,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *  if you plan on adding/removing values dynamically, from JavaScript, you will have to call the
      *  {@link Zebra_Form_Control::disable_spam_filter() disable_spam_filter()} method to prevent that from happening!</samp>
      *
-     *  @param  string  $id             Unique name to identify the control in the form.
+     *  @param string $id             Unique name to identify the control in the form.
      *
      *                                  <b>$id needs to be suffixed with square brackets if there are more checkboxes
      *                                  sharing the same name, so that PHP treats them as an array!</b>
@@ -148,7 +148,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @param  mixed   $value          Value of the checkbox.
      *
-     *  @param  array   $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (disabled, readonly, style, etc)
      *
@@ -175,7 +175,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @return void
      */
-    function __construct($id, $value, $attributes = '')
+    public function __construct(string $id, mixed $value, array $attributes = [])
     {
 
         // call the constructor of the parent class
@@ -231,10 +231,10 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML()
+    public function toHTML(): string
     {
 
-        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] == 'xhtml' ? '/' : '') . '>';
+        return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
 
     }
 

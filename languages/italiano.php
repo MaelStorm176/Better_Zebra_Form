@@ -6,7 +6,7 @@
 * @author       Nicola Tuveri <nic.tuv@gmail.com>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Rimuovi',
     'csrf_detected' => 'Si è presentato un problema col vostro invio!<br>Tra le possibili cause l\'invio può aver richiesto troppo tempo, o la richiesta è stata duplicata.<br>Riprovare, per favore.',

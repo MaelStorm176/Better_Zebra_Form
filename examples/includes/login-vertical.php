@@ -40,14 +40,13 @@
 
     // if the form is valid
     if ($form->validate()) {
-
-        // show results
         show_results();
-
-    // otherwise
-    } else
-
+    }
+    else
+    {
+        echo "Rendered form: <br /><br />";
         // auto generate output, labels above form elements
         $form->render();
+    }
 
 ?>

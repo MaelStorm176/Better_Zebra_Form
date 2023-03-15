@@ -7,7 +7,7 @@
 * @author       Stefan Gabos <contact@stefangabos.ro>
 */
 
-$this->language = array(
+const LANGUAGE = array(
 
     'clear_date'    => 'Sterge',
     'csrf_detected' => 'A existat o problema la trimitearea formularului!<br>Posibile cauze pot fi durata prea mare de timp folosita pentru completarea formularului sau incercarea de retrimitere a formularului.<br>Te rugam sa incerci din nou.',
