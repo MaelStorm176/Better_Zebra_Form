@@ -17,40 +17,39 @@
 
     $.Zebra_Form = function(element, options) {
 
-        var plugin = this;
+        const plugin = this;
 
         // public properties
-        var defaults = {
+        const defaults = {
             scroll_to_error: true,
             tips_position: 'left',
             close_tips: true,
             validate_on_the_fly: false,
             validate_all: false,
             assets_path: null
-        }
+        };
 
         plugin.settings = {}
 
         // private properties
-        var validation_rules = new Object,
-            controls_groups = new Object,
-            error_blocks = new Object,
-            placeholders = new Array,
-            proxies = new Object,
-            proxies_cache = new Object,
+        let validation_rules = {},
+            controls_groups = {},
+            error_blocks = {},
+            placeholders = [],
+            proxies = {},
+            proxies_cache = {},
             reload = false, validated = false, browser, elements;
 
         // the jQuery version of the element
         // "form" (without the $) will point to the DOM element
-        var $form = $(element),
-            form = element;
+        const $form = $(element), form = element;
 
         // code by Joyce Babu
         // found at http://www.weberdev.com/get_example-4437.html
         plugin.filter_input = function(filter_type, evt, custom_chars) {
-            var key_code, key, control, filter = '';
-            var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            var digits = '0123456789';
+            let key_code, key, control, filter = '';
+            const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const digits = '0123456789';
             if (window.event) {
                 key_code = window.event.keyCode;
                 evt = window.event;
@@ -77,11 +76,11 @@
             control = evt.srcElement ? evt.srcElement : evt.target || evt.currentTarget;
             if (key_code==null || key_code==0 || key_code==8 || key_code==9 || key_code==13 || key_code==27) return true;
             key = String.fromCharCode(key_code);
-            if ((key=='v' || key=='a' || key=='c' || key=='x') && evt.ctrlKey) return true;
+            if ((key==='v' || key==='a' || key==='c' || key==='x') && evt.ctrlKey) return true;
             if (filter.indexOf(key) > -1) return true;
             if (filter_type == 'number' && key == '-' && _get_caret_position(control) == 0) return true;
-            if (filter_type == 'float' && ((key == '-' && _get_caret_position(control) == 0) || (key == '.' && _get_caret_position(control) != 0 && control.value.match(/\./) == null))) return true;
-            return false;
+            return filter_type === 'float' && ((key === '-' && _get_caret_position(control) == 0) || (key === '.' && _get_caret_position(control) != 0 && control.value.match(/\./) == null));
+
         }
 
         /**
@@ -130,7 +129,25 @@
             // iterate through the form's elements
             elements.each(function() {
 
-                var element = $(this),
+
+                const character_counter = jQuery('<div>', {
+                    'class': 'Zebra_Character_Counter',
+                    'css':  {
+                        'visibility':   'hidden'
+                    }
+                })
+
+                // use as initial content the value of maxlength attribute
+                // to get the element's width
+                .html(element.data('maxlength'))
+
+                // inject it into the DOM right after the textarea element
+                // (we need to do this so we can get its width and height)
+                .insertAfter(element);
+// create a text element that will float above the element until the the parent element receives the focus
+                let placeholder;
+                let position;
+                let element = $(this),
 
                     // get some attributes of the element
                     attributes = {'id': element.attr('id'), 'name': element.attr('name'), 'type': _type(element)},
@@ -142,7 +159,7 @@
                 // if element also has the "name" attribute
                 // (some plugins copy the original element's classes and Zebra_Form will falsely belive they are form elements
                 // once it gets to them)
-                if (undefined != attributes['name'])
+                if (undefined !== attributes['name'])
 
                     // sanitize element's name by removing square brackets (if available)
                     attributes['name'] = attributes['name'].replace(/[\[\]]/g, '');
@@ -154,9 +171,9 @@
                     (element.hasClass('inside') && (
 
                         // the class is applied to an allowed element type
-                        attributes['type'] == 'text' ||
-                        attributes['type'] == 'password' ||
-                        attributes['type'] == 'textarea'
+                        attributes['type'] === 'text' ||
+                        attributes['type'] === 'password' ||
+                        attributes['type'] === 'textarea'
 
                     )) ||
 
@@ -164,7 +181,7 @@
                     element.hasClass('show-character-counter') ||
 
                     // element is "text" or "password" and has the "prefix" data attribute set
-                    ((attributes['type'] == 'text' || attributes['type'] == 'password') && element.data('prefix'))
+                    ((attributes['type'] === 'text' || attributes['type'] === 'password') && element.data('prefix'))
 
 
                 ) {
@@ -172,14 +189,14 @@
                     // we create a wrapper for the parent element so that we can later position the
                     // placeholder, prefix or characer counter
                     // also, make sure the wrapper inherits some important css properties of the parent element
-                    var element_wrapper = jQuery('<span class="Zebra_Form_Wrapper"></span>').css({
-                        'display':  element.css('display'),
-                        'position': element.css('position') == 'static' ? 'relative' : element.css('position'),
-                        'float':    element.css('float'),
-                        'top':      element.css('top'),
-                        'right':    element.css('right'),
-                        'bottom':   element.css('bottom'),
-                        'left':     element.css('left')
+                    const element_wrapper = jQuery('<span class="Zebra_Form_Wrapper"></span>').css({
+                        'display': element.css('display'),
+                        'position': element.css('position') === 'static' ? 'relative' : element.css('position'),
+                        'float': element.css('float'),
+                        'top': element.css('top'),
+                        'right': element.css('right'),
+                        'bottom': element.css('bottom'),
+                        'left': element.css('left')
                     });
 
                     // replace the parent element with the wrapper and then place it inside the wrapper
@@ -217,39 +234,40 @@
                     element.hasClass('inside') && (
 
                         // the class is applied to an allowed element type
-                        attributes['type'] == 'text' ||
-                        attributes['type'] == 'password' ||
-                        attributes['type'] == 'textarea'
+                        attributes['type'] === 'text' ||
+                        attributes['type'] === 'password' ||
+                        attributes['type'] === 'textarea'
 
                     )
 
                 ) {
 
                     // get element's offset relative to the first positioned parent element
-                    var position = element.position();
+                    position = element.position();
 
                     // if element is a text box or a password
-                    if (attributes['type'] == 'text' || attributes['type'] == 'password')
-
-                        // create a text element that will float above the element until the the parent element receives the focus
-                        var placeholder = jQuery('<input>').attr({
+                    if (attributes['type'] === 'text' || attributes['type'] === 'password') {
+                        placeholder = jQuery('<input>').attr({
                             'type':         'text',
                             'class':        'Zebra_Form_Placeholder',
                             'autocomplete': 'off',
                             'value':        element.attr('title')
                         });
+                    }
 
                     // if element is a textarea
                     else
 
                         // create a textarea element that will float above the element until the parent element receives the focus
-                        var placeholder = jQuery('<textarea>').attr({
-                            'class':        'Zebra_Form_Placeholder',
-                            'autocomplete': 'off'
-                        }).html(element.attr('title'));
+                        {
+                            placeholder = jQuery('<textarea>').attr({
+                                'class': 'Zebra_Form_Placeholder',
+                                'autocomplete': 'off'
+                            }).html(element.attr('title'));
+                        }
 
                     // if element is a password field
-                    if (attributes['type'] == 'password')
+                    if (attributes['type'] === 'password')
 
                         // temporarily set the font family to "inherit" so that the placeholder's font will be the
                         // same everywhere
@@ -298,7 +316,7 @@
                         },
 
                         // if element loses focus but it's empty, show the placeholder
-                        'blur':     function() { if ($(this).val() == '') placeholder.show() }
+                        'blur':     function() { if ($(this).val() === '') placeholder.show() }
 
                     });
 
@@ -311,14 +329,14 @@
                     // set the password field's font family back to this so that the discs will look the same on all browsers
                     // WebKit browsers (Chrome & Safari) seem to get it wrong for password fields when using various
                     // font families, and display really small dots instead of the discs that appear for every other browser
-                    if (attributes['type'] == 'password')
+                    if (attributes['type'] === 'password')
 
                         element.css({
                             'fontFamily': 'Verdana, Tahoma, Arial'
                         });
 
                 // if element has the "other" class set and element is a drop-down
-                } else if (element.hasClass('other') && attributes['type'] == 'select-one') {
+                } else if (element.hasClass('other') && attributes['type'] === 'select-one') {
 
                     // run this private method that shows/hides the "other" text box depending on the selection
                     _show_hide_other_option(element);
@@ -340,7 +358,7 @@
                     plugin.register(element, false);
 
                 // if element is a valid element with the maxlength attribute set
-                if ((attributes['type'] == 'text' || attributes['type'] == 'textarea' || attributes['type'] == 'password') && element.attr('maxlength')) {
+                if ((attributes['type'] === 'text' || attributes['type'] === 'textarea' || attributes['type'] === 'password') && element.attr('maxlength')) {
 
                     // because PHP and JavaScript treat new lines differently, we need to do some extra work
                     // in PHP new line characters count as 2 characters while in JavaScript as 1
@@ -354,9 +372,7 @@
                     // handle the onKeyUp event
                     element.bind('keyup', function(e) {
 
-                        var
-
-                            // reference to the textarea element
+                        const // reference to the textarea element
                             $el = $(this),
 
                             // the value of the "maxlength" attribute
@@ -374,7 +390,7 @@
                         if ($el.hasClass('show-character-counter')) {
 
                             // get the number of characters left
-                            var available_chars = maxlength - diff - $el.val().length;
+                            const available_chars = maxlength - diff - $el.val().length;
 
                             // update the character counter
                             character_counter.html(available_chars < 0 ? '<span>' + available_chars + '</span>' : available_chars);
@@ -386,30 +402,11 @@
                     // if the character counter needs to be shown
                     if (element.hasClass('show-character-counter')) {
 
-                        var
+                        position = element.position();
 
-                            // get textarea element's position relative to the first positioned element
-                            position = element.position(),
-
-                            // create the character counter
-                            character_counter = jQuery('<div>', {
-                                'class': 'Zebra_Character_Counter',
-                                'css':  {
-                                    'visibility':   'hidden'
-                                }
-                            })
-
-                            // use as initial content the value of maxlength attribute
-                            // to get the element's width
-                            .html(element.data('maxlength'))
-
-                            // inject it into the DOM right after the textarea element
-                            // (we need to do this so we can get its width and height)
-                            .insertAfter(element);
-
-                            // get the character counter's width and height
-                            width = character_counter.outerWidth(),
-                            height = character_counter.outerHeight();
+                        // get the character counter's width and height
+                        const width = character_counter.outerWidth();
+                        const height = character_counter.outerHeight();
 
                         // position the character counter at the bottom-right of the textarea, and make it visible
                         character_counter.css({
@@ -427,12 +424,12 @@
                 }
 
                 // if element is "text" or "password" and has the "prefix" data attribute set
-                if ((attributes['type'] == 'text' || attributes['type'] == 'password') && element.data('prefix')) {
-
-                    var
-
-                        // get the "prefix"
-                        prefix = element.data('prefix'),
+                if ((attributes['type'] === 'text'
+                    || attributes['type'] === 'password')
+                    && element.data('prefix')
+                ) {
+                    // get the "prefix" data attribute's value and split it into the prefix and the element's value
+                    let prefix = element.data('prefix'),
                         match = decodeURIComponent(prefix.replace(/\+/g, ' ')).match(/^img\:(.*)/i),
 
                         // is the prefix an image?
@@ -481,7 +478,7 @@
                     });
 
                     // if box-sizing is not "border-box"
-                    if (element.css('boxSizing') != 'border-box')
+                    if (element.css('boxSizing') !== 'border-box')
 
                         // adjust the element's width
                         element.css({
@@ -489,7 +486,7 @@
                         });
 
                     // if element has a placeholder
-                    if (undefined != placeholder)
+                    if (undefined !== placeholder)
 
                         // adjust also the placeholder's position
                         placeholder.css({
@@ -509,32 +506,34 @@
             });
 
             // iterate through the elements that have validation rules
-            for (var element in plugin.settings.validation_rules)
+            for (const element in plugin.settings.validation_rules)
 
                 // iterate through the rules of each element
-                for (var rule_name in plugin.settings.validation_rules[element])
+                for (const rule_name in plugin.settings.validation_rules[element])
 
                     // if "dependencies" rule exists
-                    if (rule_name == 'dependencies') {
+                    if (rule_name === 'dependencies') {
 
                         (function() {
 
                             // get all the conditions needed to validate the element
-                            var conditions = plugin.settings.validation_rules[element][rule_name];
+                            let proxy;
+
+                            let conditions = plugin.settings.validation_rules[element][rule_name];
 
                             // if the name of a callback function is also given
                             // the actual conditions are in the first entry of the array
                             if (typeof conditions[1] == 'string') conditions = conditions[0];
 
                             // iterate through the elements the validation of the current element depends on (proxies)
-                            for (var proxy in conditions) {
+                            for (proxy in conditions) {
 
                                 // find the proxy / proxies (as more radio buttons can share the same name)
-                                var $proxy = $('input[name="' + proxy + '"],select[name="' + proxy + '"],textarea[name="' + proxy + '"],button[name="' + proxy + '"]', form);
+                                let $proxy = $('input[name="' + proxy + '"],select[name="' + proxy + '"],textarea[name="' + proxy + '"],button[name="' + proxy + '"]', form);
 
                                 // if no elements were found search again as checkbox groups and multiple selects
                                 // also have [] in their name
-                                if ($proxy.length == 0) $proxy = $('input[name="' + proxy + '[]"],select[name="' + proxy + '[]"],textarea[name="' + proxy + '[]"]', form);
+                                if ($proxy.length === 0) $proxy = $('input[name="' + proxy + '[]"],select[name="' + proxy + '[]"],textarea[name="' + proxy + '[]"]', form);
 
                                 // if proxy was found
                                 if ($proxy.length > 0) {

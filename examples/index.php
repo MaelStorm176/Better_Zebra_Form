@@ -304,7 +304,7 @@ function dump()
         <div class="clear"></div>
 
         <script type="text/javascript" src="libraries/highlight/public/javascript/highlight.js"></script>
-        <script type="text/javascript" src="public/javascript/jquery-1.12.0.js"></script>
+        <script type="text/javascript" src="public/javascript/jquery-3.6.4.js"></script>
         <script type="text/javascript" src="../public/javascript/zebra_form.js"></script>
         <script type="text/javascript" src="public/javascript/core.js"></script>
 
