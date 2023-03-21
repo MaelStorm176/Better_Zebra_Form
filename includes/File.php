@@ -52,7 +52,7 @@ class Zebra_Form_File extends Zebra_Form_Control
      *                                  echo $my_file_upload;
      *                                  </code>
      *
-     *  @param array|string $attributes     (Optional) An array of attributes valid for
+     *  @param array $attributes     (Optional) An array of attributes valid for
      *                                  {@link http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.4 input}
      *                                  controls (size, readonly, style, etc)
      *

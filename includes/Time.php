@@ -264,7 +264,7 @@ class Zebra_Form_Time extends Zebra_Form_Control
                     <option value="">-</option>';
 
             foreach ($attributes['seconds'] as $second) {
-                $output .= '<option value="' . str_pad($second, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_second) && ltrim($selected_second, '0') == ltrim($second, '0') ? ' selected="selected"' : '') . '>' . str_pad($second, 2, '0', STR_PAD_LEFT) . '</option>';
+                $output .= '<option value="' . str_pad($second, 2, '0', STR_PAD_LEFT) . '"' . (isset($selected_second) && ltrim($selected_second, '0') === ltrim($second, '0') ? ' selected="selected"' : '') . '>' . str_pad($second, 2, '0', STR_PAD_LEFT) . '</option>';
             }
 
             $output .= '

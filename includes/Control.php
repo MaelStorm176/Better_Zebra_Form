@@ -38,6 +38,24 @@ class Zebra_Form_Control extends XSS_Clean
     public array $rules;
 
     /**
+     * Array of JavaScript attributes of the element
+     *
+     * @var array
+     *
+     * @access private
+     */
+    public array $javascript_attributes;
+
+    /**
+     * The value of the control as submitted by the user
+     *
+     * @var mixed
+     *
+     * @access public
+     */
+    public mixed $submitted_value;
+
+    /**
      *  Constructor of the class
      *
      *  @return void
@@ -90,10 +108,10 @@ class Zebra_Form_Control extends XSS_Clean
      *                          Can be (case-insensitive) "upper" or "lower".
      *
      *  @return void
-     *@since  2.8
+     *  @since  2.8
      *
      */
-    function change_case(string $case): void
+    public function change_case(string $case): void
     {
 
         // make sure the argument is lowercase
@@ -120,7 +138,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function disable_spam_filter(): void
+    public function disable_spam_filter(): void
     {
 
         // set the "disable_xss_filters" private attribute of the control
@@ -143,7 +161,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function disable_xss_filters(): void
+    public function disable_xss_filters(): void
     {
 
         // set the "disable_xss_filters" private attribute of the control
@@ -183,17 +201,10 @@ class Zebra_Form_Control extends XSS_Clean
      *  @return array                   Returns an associative array where keys are the attributes and the values are
      *                                  each attribute's value, respectively.
      */
-    public function get_attributes($attributes): array
+    public function get_attributes(array $attributes): array
     {
-
         // initialize the array that will be returned
         $result = array();
-
-        // if the request was for a single attribute,
-        // treat it as an array of attributes
-        if (!is_array($attributes)) {
-            $attributes = array($attributes);
-        }
 
         // iterate through the array of attributes to look for
         foreach ($attributes as $attribute)
@@ -208,7 +219,41 @@ class Zebra_Form_Control extends XSS_Clean
 
         // return the results
         return $result;
+    }
 
+    /**
+     * Returns the value of a given attribute.
+     *
+     * <code>
+     * // create a new form
+     * $form = new Zebra_Form('my_form');
+     *
+     * // add a text field to the form
+     * $obj = $form->add('text', 'my_text');
+     *
+     * // set some attributes for the text field
+     * $obj->set_attributes(array(
+     *    'readonly'  => 'readonly',
+     *   'style'     => 'font-size:20px',
+     * ));
+     *
+     * // retrieve the attributes
+     * // the result will be a string
+     * $attribute = $obj->get_attribute('readonly');
+     * </code>
+     *
+     * @param string $attribute
+     * @return string
+     */
+    public function get_attribute(string $attribute): string
+    {
+        // if attribute exists
+        if (array_key_exists($attribute, $this->attributes))
+        {
+            // return the attribute's value
+            return $this->attributes[$attribute];
+        }
+        return '';
     }
 
     /**
@@ -225,7 +270,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @access private
      */
-    function get_submitted_value()
+    public function get_submitted_value(): void
     {
 
         // get some attributes of the control
@@ -256,14 +301,22 @@ class Zebra_Form_Control extends XSS_Clean
                 if ($attribute['type'] === 'time') {
 
                     // combine hour, minutes and seconds into one single string (values separated by :)
+                    $hours = $method[$attribute['name'] . '_hours'] ?? '';
+                    $minutes = $method[$attribute['name'] . '_minutes'] ?? '';
+                    $seconds = $method[$attribute['name'] . '_seconds'] ?? '';
+                    $ampm = $method[$attribute['name'] . '_ampm'] ?? '';
+
                     // hours
-                    $combined = (isset($method[$attribute['name'] . '_hours']) ? $method[$attribute['name'] . '_hours'] : '');
-                    // minutes
-                    $combined .= (isset($method[$attribute['name'] . '_minutes']) ? ($combined != '' ? ':' : '') . $method[$attribute['name'] . '_minutes'] : '');
-                    // seconds
-                    $combined .= (isset($method[$attribute['name'] . '_seconds']) ? ($combined != '' ? ':' : '') . $method[$attribute['name'] . '_seconds'] : '');
-                    // AM/PM
-                    $combined .= (isset($method[$attribute['name'] . '_ampm']) ? ($combined != '' ? ' ' : '') . $method[$attribute['name'] . '_ampm'] : '');
+                    $combined = $hours;
+                    if ($minutes !== '') {
+                        $combined .= ($combined !== '' ? ':' : '') . $minutes;
+                    }
+                    if ($seconds !== '') {
+                        $combined .= ($combined !== '' ? ':' : '') . $seconds;
+                    }
+                    if ($ampm !== '') {
+                        $combined .= ($combined !== '' ? ' ' : '') . $ampm;
+                    }
 
                     // create a super global having the name of our time picker control
                     // (remember, we don't have a control with the time picker's control name but three other controls
@@ -274,11 +327,7 @@ class Zebra_Form_Control extends XSS_Clean
 
                     // unset the three temporary fields as we want to return to the user the result in a single field
                     // having the name he supplied
-                    unset($method[$attribute['name'] . '_hours']);
-                    unset($method[$attribute['name'] . '_minutes']);
-                    unset($method[$attribute['name'] . '_seconds']);
-                    unset($method[$attribute['name'] . '_ampm']);
-
+                    unset($method[$attribute['name'] . '_hours'], $method[$attribute['name'] . '_minutes'], $method[$attribute['name'] . '_seconds'], $method[$attribute['name'] . '_ampm']);
                 }
 
                 // if control was submitted
@@ -293,56 +342,59 @@ class Zebra_Form_Control extends XSS_Clean
 
                         // iterate through the submitted values
                         foreach ($this->submitted_value as $key => $value)
-
+                        {
                             // and also, if magic_quotes_gpc is on (meaning that
                             // both single and double quotes are escaped)
                             // strip those slashes
                             //if (get_magic_quotes_gpc()) $this->submitted_value[$key] = stripslashes($value);
                             $this->submitted_value[$key] = stripslashes($value);
+                        }
 
                     // if submitted value is not an array
-                    } else
-
+                    } else {
                         // and also, if magic_quotes_gpc is on (meaning that both
                         // single and double quotes are escaped)
                         // strip those slashes
                         //if (get_magic_quotes_gpc()) $this->submitted_value = stripslashes($this->submitted_value);
                         $this->submitted_value = stripslashes($this->submitted_value);
+                    }
 
                     // if submitted value is an array
                     if (is_array($this->submitted_value))
-
+                    {
                         // iterate through the submitted values
-                        foreach ($this->submitted_value as $key => $value)
-
+                        foreach ($this->submitted_value as $key => $value) {
                             // filter the control's value for XSS injection and/or convert applicable characters to their equivalent HTML entities
                             $this->submitted_value[$key] = htmlspecialchars(!$attribute['disable_xss_filters'] ? $this->sanitize($value) : $value);
+                        }
+                    }
 
                     // if submitted value is not an array, filter the control's value for XSS injection and/or convert applicable characters to their equivalent HTML entities
+                    else if (isset($this->rules['url'])) {
+                        $this->submitted_value = (!$attribute['disable_xss_filters'] ? $this->sanitize($this->submitted_value, false) : $this->submitted_value);
+                    }
+
+                    // for all other values
                     else {
-
-                        // don't apply htmlspecialchars to URLs and don't use rawurldecode neither
-                        if (isset($this->rules['url'])) $this->submitted_value = (!$attribute['disable_xss_filters'] ? $this->sanitize($this->submitted_value, false) : $this->submitted_value);
-
-                        // for all other values
-                        else $this->submitted_value = htmlspecialchars(!$attribute['disable_xss_filters'] ? $this->sanitize($this->submitted_value) : $this->submitted_value);
-
+                        $this->submitted_value = htmlspecialchars(!$attribute['disable_xss_filters'] ? $this->sanitize($this->submitted_value) : $this->submitted_value);
                     }
 
                     // set the respective $_POST/$_GET value to the filtered value
                     $method[$attribute['name']] = $this->submitted_value;
 
                 // if control is a file upload control and a file was indeed uploaded
-                } elseif ($attribute['type'] === 'file' && isset($_FILES[$attribute['name']]))
-
+                } elseif ($attribute['type'] === 'file' && isset($_FILES[$attribute['name']])) {
                     $this->submitted_value = true;
+                }
 
                 // if control was not submitted
                 // we set this for those controls that are not submitted even
                 // when the form they reside in is (i.e. unchecked checkboxes)
                 // so that we know that they were indeed submitted but they
                 // just don't have a value
-                else $this->submitted_value = false;
+                else {
+                    $this->submitted_value = false;
+                }
 
                 if (
 
@@ -355,10 +407,14 @@ class Zebra_Form_Control extends XSS_Clean
                 ) {
 
                     // if string must be uppercase, update the value accordingly
-                    if ($modifiers[0] === 'modifier-uppercase') $this->submitted_value = strtoupper($this->submitted_value);
+                    if ($modifiers[0] === 'modifier-uppercase') {
+                        $this->submitted_value = strtoupper($this->submitted_value);
+                    }
 
                     // otherwise, string needs to be lowercase
-                    else $this->submitted_value = strtolower($this->submitted_value);
+                    else {
+                        $this->submitted_value = strtolower($this->submitted_value);
+                    }
 
                     // set the respective $_POST/$_GET value to the updated value
                     $method[$attribute['name']] = $this->submitted_value;
@@ -394,12 +450,15 @@ class Zebra_Form_Control extends XSS_Clean
                             $attribute['value'] == $this->submitted_value
 
                         // set the "checked" attribute of the control
-                        ) $this->set_attributes(array('checked' => 'checked'));
+                        ) {
+                            $this->set_attributes(array('checked' => 'checked'));
+                        }
 
                         // if checkbox was "submitted" as not checked
                         // and if control's default state is checked, uncheck it
-                        elseif (isset($this->attributes['checked'])) unset($this->attributes['checked']);
-
+                        elseif (isset($this->attributes['checked'])) {
+                            unset($this->attributes['checked']);
+                        }
                         break;
 
                     // if control is a radio button
@@ -412,7 +471,9 @@ class Zebra_Form_Control extends XSS_Clean
                             ($attribute['value'] == $this->submitted_value)
 
                         // set the "checked" attribute of the control
-                        ) $this->set_attributes(array('checked' => 'checked'));
+                        ) {
+                            $this->set_attributes(array('checked' => 'checked'));
+                        }
 
                         break;
 
@@ -480,7 +541,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function reset()
+    public function reset(): void
     {
 
         // reference to the form submission method
@@ -500,15 +561,9 @@ class Zebra_Form_Control extends XSS_Clean
             // control is any of the types below
             case 'checkbox':
             case 'radio':
-
-                // unset the "checked" attribute
-                unset($this->attributes['checked']);
-
-                // unset the associated superglobal
-                unset($method[$attributes['name']]);
-
+                // unset the "checked" attribute && the associated superglobal
+                unset($this->attributes['checked'], $method[$attributes['name']]);
                 break;
-
             // control is any of the types below
             case 'date':
             case 'hidden':
@@ -524,10 +579,10 @@ class Zebra_Form_Control extends XSS_Clean
                 unset($method[$attributes['name']]);
 
                 // if control has the "other" attribute set
-                if (isset($attributes['other']))
-
+                if (isset($attributes['other'])) {
                     // clear the associated superglobal's value
                     unset($method[$attributes['name'] . '_other']);
+                }
 
                 break;
 
@@ -606,7 +661,7 @@ class Zebra_Form_Control extends XSS_Clean
      *
      *  @return void
      */
-    function set_attributes(array $attributes, bool $overwrite = true)
+    public function set_attributes(array $attributes, bool $overwrite = true): void
     {
 
         // iterate through the given attributes array

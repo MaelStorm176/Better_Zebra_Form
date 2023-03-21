@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  php:
+    image: php:8.1-apache
+    container_name: zebra_php
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+        - "80:80"
+
+networks:
+  php:
+    driver: bridge

@@ -151,11 +151,7 @@ class Zebra_Form_Note extends Zebra_Form_Control
      */
     public function toHTML(): string
     {
-
-        $attributes = $this->get_attributes('caption');
-        
-        return '<div ' . $this->_render_attributes() . '>' . $attributes['caption'] . '</div>';
-
+        return '<div ' . $this->_render_attributes() . '>' . $this->get_attribute('caption') . '</div>';
     }
 
 }

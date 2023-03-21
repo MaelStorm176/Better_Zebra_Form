@@ -8,7 +8,7 @@
     require '../Zebra_Form.php';
 
     // instantiate a Zebra_Form object
-    $form = new Zebra_Form('form');
+    $form = new Zebra_Form('formik');
 
     // auto-fill fields with random values
     // very useful for when debugging forms
@@ -108,9 +108,10 @@
         show_results();
 
     // otherwise
-    } else
+    } else {
 
         // generate output using a custom template
         $form->render();
+    }
 
 ?>

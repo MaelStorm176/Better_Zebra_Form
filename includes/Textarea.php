@@ -138,12 +138,7 @@ class Zebra_Form_Textarea extends Zebra_Form_Control
      */
     public function toHTML(): string
     {
-
-        // get private attributes
-        $attributes = $this->get_attributes('value');
-
-        return '<textarea ' . $this->_render_attributes() . '>' . (isset($attributes['value']) ? $attributes['value'] : '') . '</textarea>';
-
+        return '<textarea ' . $this->_render_attributes() . '>' . $this->get_attribute('value') . '</textarea>';
     }
 
 }

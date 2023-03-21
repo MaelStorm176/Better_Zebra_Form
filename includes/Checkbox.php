@@ -233,9 +233,7 @@ class Zebra_Form_Checkbox extends Zebra_Form_Control
      */
     public function toHTML(): string
     {
-
         return '<input ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>';
-
     }
 
 }
