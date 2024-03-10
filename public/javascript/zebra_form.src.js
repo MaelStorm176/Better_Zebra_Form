@@ -17,6 +17,379 @@
 
     $.Zebra_Form = function(element, options) {
 
+        /**
+                 *  Checks if all the conditions set by the "dependencies" rule are met or not.
+                 *
+                 *  @param  element {string}     The ID of the element to check.
+                 *
+                 *  @param  referer {Array}     (Private) Used by the library to prevent entering an infinite loop of dependencies.
+                 *
+                 *  @return boolean             Returns TRUE if all the conditions are met or FALSE otherwise.
+                 *
+                 *  @access private
+                 */
+        const _validate_dependencies = function(element, referer) {
+
+            // if referer is not available, initialize it now
+            if (undefined === referer) referer = [];
+
+            // if there are more than 2 entries in the referer array, remove the first one
+            if (referer.length > 2) referer.shift();
+
+            // if current element is the referer array
+            if ($.inArray(element, referer) > -1)
+
+                // we're having a recursion and we're stopping execution
+                throw new Error('Infinite recursion detected. The loop of dependencies is created by the following elements: "' + referer.join('", "') + '"');
+
+            // add current element to the stack
+            referer.push(element);
+
+            // get all the conditions needed to validate the element
+            let conditions = plugin.settings.validation_rules[element]['dependencies'];
+
+            // if the name of a callback function is also given
+            // the actual conditions are in the first entry of the array
+            if (typeof conditions[1] == 'string') conditions = conditions[0];
+
+            let result = true;
+
+            // iterate through the elements the validation of the current element depends on (proxies)
+            for (const proxy in conditions) {
+
+                // if we have a cached result of the result
+                if (undefined !== proxies_cache[proxy] && undefined !== proxies_cache[proxy][conditions[proxy]])
+
+                    // get the result from cache
+                    result = proxies_cache[proxy][conditions[proxy]];
+
+                // if we don't have a cached result of the result
+                else {
+
+                    // if proxy also depends on another condition
+                    if (undefined !== plugin.settings.validation_rules[proxy] && undefined !== plugin.settings.validation_rules[proxy]['dependencies'])
+
+                        // check recursively that the conditions of all parents are met
+                        result = _validate_dependencies(proxy, referer);
+
+                    // continue if the conditions of all parents (if any) are met
+                    if (result) {
+
+                        // for each proxy/value combination there's a stored function
+                        // for the function's name we use a special array-to-string method
+                        const function_name = _toString(conditions[proxy]);
+
+                        // if proxy is not an existing element or any of the condition is not met, flag that
+                        if (!proxies[proxy] || !proxies[proxy]['conditions'][function_name]()) result = false;
+
+                    }
+
+                    // cache the result
+                    if (undefined === proxies_cache[proxy]) proxies_cache[proxy] = {};
+                    if (undefined === proxies_cache[proxy][conditions[proxy]]) proxies_cache[proxy][conditions[proxy]] = result;
+
+                }
+
+                // if there's a problem, don't check any furhter
+                if (!result) break;
+
+            }
+
+            // if not all conditions are met, don't validate further
+            return result;
+
+        };
+        /**
+                 *  Returns an element's type
+                 *
+                 *  @param  $element {jQuery} A jQuery element for which to identify the type.
+                 *
+                 *  @return string          Returns an element's type.
+                 *
+                 *                          Possible values are:
+                 *
+                 *                          button,
+                 *                          checkbox,
+                 *                          file,
+                 *                          password,
+                 *                          radio,
+                 *                          submit,
+                 *                          text,
+                 *                          select-one,
+                 *                          select-multiple,
+                 *                          textarea
+                 *
+                 *  @access private
+                 */
+        const _type = function($element) {
+
+            // values that may be returned by the is() function
+            const types = [
+                'button',
+                'input:checkbox',
+                'input:file',
+                'input:image',
+                'input:password',
+                'input:radio',
+                'input:submit',
+                'input:text',
+                'select',
+                'textarea'
+            ];
+            const html5_types = [
+                'email',
+                'number'
+            ];
+
+            // because elements of type "email" and "number" were not yet added to jQuery (as of jQuery 1.11.1)
+            // we'll test for those separately
+
+            // iterate through the possible types
+            for (let index in html5_types)
+
+                // if we found the element's type to be one of those, treate element as input type="text"
+                if ($element.attr('type') && $element.attr('type').toLowerCase() === html5_types[index]) return 'text';
+
+            // iterate through the possible types
+            for (let index in types)
+
+                // if we have an element's type
+                if ($element.is(types[index])) {
+
+                    // if type is "select"
+                    if (types[index] === 'select') {
+
+                        // if the "multiple" attribute is set
+                        if ($element.attr('multiple')) return 'select-multiple';
+
+                        // if the "multiple" attribute is not set
+                        else return 'select-one';
+
+                    }
+
+                    // return the element's type, from which we remove the "input:" string
+                    return types[index].replace(/input\:/, '');
+
+                }
+
+        };
+        /**
+                 *  Returns the string representation of an array; used by the "dependencies" rule.
+                 *
+                 *  @param  array   array   The array for which to create the string representation.
+                 *
+                 *  @return string  Returns the string representation of the array given as argument.
+                 *
+                 *  @access private
+                 */
+        const _toString = function(array) {
+
+            // if argument is not an array, return the argument
+            if (!$.isArray(array)) return array;
+
+            let result = '';
+
+            // iterate through the entries in the array
+            $.each(array, function(index) {
+
+                let value = array[index];
+
+                // if entry is also an array, call this method recursively
+                // and place it inside some special characters
+                if ($.isArray(value)) value = '|' + _toString(value) + '|';
+
+                // build the string
+                result += (result !== '' ? '' : '') + value;
+
+            });
+
+            // return the resulting string
+            return result;
+
+        };
+        /**
+                 *  Shows or hides, as necessary, the "other" options for a "select" control, that has an "other" option set.
+                 *
+                 *  @param  jQuery      $element    A  <select> element having the "other" property set.
+                 *
+                 *  @return void
+                 *
+                 *  @access private
+                 */
+        const _show_hide_other_option = function($element) {
+
+            // reference to the "other option" text box
+            // it has the ID of the select control, suffixed by "_other"
+            const $other = $('#' + $element.attr('id') + '_other');
+
+            // if the select control's value is "other"
+            // show the "other option" text box
+            if ($element.val() === 'other') $other.css('display', 'block');
+
+            // if the select control's value is different than "other"
+            // hide the "other option" text box
+            else $other.css('display', 'none');
+
+        };
+        /**
+                 *  Generates an iFrame shim in Internet Explorer 6 so that the tooltips appear above select boxes.
+                 *
+                 *  @return void
+                 *
+                 *  @access private
+                 */
+        const _shim = function($element) {
+
+            // this is necessary only if browser is Internet Explorer 6
+    		if (browser.name === 'explorer' && browser.version == 6) {
+
+                // if an iFrame was not yet attached to the element
+                if (!$element.data('shim')) {
+
+                    const // get element's top and left position
+                        offset = $element.offset(),
+
+                        // the iFrame has to have the element's zIndex minus 1
+                        zIndex = parseInt($element.css('zIndex'), 10) - 1,
+
+                        // create the iFrame
+                        shim = jQuery('<iframe>', {
+                            'src': 'javascript:document.write("")',
+                            'scrolling': 'no',
+                            'frameborder': 0,
+                            'allowTransparency': 'true',
+                            'class': 'Zebra_Form_error_iFrameShim',
+                            'css': {
+                                'zIndex': zIndex,
+                                'position': 'absolute',
+                                'top': offset.top,
+                                'left': offset.left,
+                                'width': $element.outerWidth(),
+                                'height': $element.outerHeight(),
+                                'filter': 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)',
+                                'display': 'block'
+                            }
+                        });
+
+                    // inject iFrame into DOM
+                    $('body').append(shim);
+
+                    // attach the shim to the element
+                    $element.data('shim', shim);
+
+                }
+
+            }
+
+        };
+        /**
+                 *  Computes the difference between a string's length when computed by PHP and by JavaScript.
+                 *
+                 *  In PHP new line characters have 2 bytes! Read more at
+                 *  http://www.sitepoint.com/line-endings-in-javascript/ and at
+                 *  http://drupal.org/node/1267802
+                 *
+                 *  @return integer    Returns the difference in length between a string as computed by PHP and by JavaScript.
+                 *
+                 *  @access private
+                 */
+        const _maxlength_diff = function(el) {
+
+            const // get the value in the textarea, if any
+                str = el.val(),
+
+                // get the length as computed by JavaScript
+                len1 = str.length,
+
+                // get the length as computed by PHP
+                len2 = str.replace(/(\r\n|\r|\n)/g, "\r\n").length;
+
+            // return the difference in length
+            return len2 - len1;
+
+        };
+        /**
+                 *  Gets the cursor's position in a text element.
+                 *
+                 *  Used by the filter_input method.
+                 *
+                 *  @param  object  element     A DOM element
+                 *
+                 *  @return integer             Returns the cursor's position in a text or textarea element.
+                 *
+                 *  @access private
+                 */
+        const _get_caret_position = function(element) {
+
+            // if selectionStart function exists, return the cursor's position
+            // (this is available for most browsers except IE < 9)
+    		if (element.selectionStart != null) return element.selectionStart;
+
+            // for IE < 9
+            const range = document.selection.createRange();
+            const duplicate = range.duplicate();
+
+            // if element is a textbox, return the cursor's position
+    		if (element.type === 'text') return (0 - duplicate.moveStart('character', -100000));
+
+            // if element is a textarea
+    		else {
+
+                // do some computations...
+                const value = element.value;
+                const offset = value.length;
+
+                duplicate.moveToElementText(element);
+    			duplicate.setEndPoint('StartToStart', range);
+
+                // return the cursor's position
+    			return offset - duplicate.text.length;
+
+            }
+
+        };
+        /**
+                 *  Escapes special characters in a string, preparing it for use in a regular expression.
+                 *
+                 *  @param  string  str     The string in which special characters should be escaped.
+                 *
+                 *  @return string          Returns the string with escaped special characters.
+                 *
+                 *  @access private
+                 */
+        const _escape_regexp = function(str) {
+
+		  return str.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+
+        };
+        /**
+                 *  Continuously checks for value updates on fields having placeholders.
+                 *
+                 *  We needs this so that we can hide the placeholders when the fields are updated by the browsers' auto-complete
+                 *  feature.
+                 *
+                 *  @access private
+                 */
+        const _check_values = function() {
+
+            // iterate through the elements that have placeholders
+            $.each(placeholders, function() {
+
+                // reference to the jQuery version of the element
+                const $element = $(this);
+
+                // reference to the placeholder element
+                const $placeholder = $element.data('Zebra_Form_Placeholder');
+
+                // if element has no value and it doesn't have the focus, display the placeholder
+                if ($element.val() === '' && !$element.is(':focus')) $placeholder.show();
+
+                // otherwise, hide the placeholder
+                else $placeholder.hide();
+
+            });
+
+        };
         const plugin = this;
 
         // public properties
@@ -78,8 +451,8 @@
             key = String.fromCharCode(key_code);
             if ((key==='v' || key==='a' || key==='c' || key==='x') && evt.ctrlKey) return true;
             if (filter.indexOf(key) > -1) return true;
-            if (filter_type == 'number' && key == '-' && _get_caret_position(control) == 0) return true;
-            return filter_type === 'float' && ((key === '-' && _get_caret_position(control) == 0) || (key === '.' && _get_caret_position(control) != 0 && control.value.match(/\./) == null));
+            if (filter_type === 'number' && key === '-' && _get_caret_position(control) === 0) return true;
+            return filter_type === 'float' && ((key === '-' && _get_caret_position(control) === 0) || (key === '.' && _get_caret_position(control) !== 0 && control.value.match(/\./) == null));
 
         }
 
@@ -1723,6 +2096,7 @@
          *  @return boolean             Returns TRUE if every rule attached to the element was obeyed, FALSE if not.
          */
         plugin.validate_control = function(element) {
+            let file_info;
             let exp;
             let rule_not_passed;
 // get some attributes of the element
@@ -1945,6 +2319,7 @@
 
                                     // if element has a value
                                     let segments;
+                                    let iterable;
                                     if ($.trim(element.val()) !== '') {
 
                                         let // by default, we assume the date is invalid
@@ -2079,15 +2454,15 @@
 
                                                 // check if date is a valid date (i.e. there's no February 31)
 
-                                                var original_day = null,
-                                                    original_month = null,
-                                                    original_year = null,
-                                                    english_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                                                    english_months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                                                    iterable = null,
+                                                let original_day = null;
+                                                let original_month = null;
+                                                let original_year = null;
+                                                const english_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                                const english_months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                                                let iterable = null;
 
-                                                    // by default, we assume the date is valid
-                                                    valid = true;
+                                                // by default, we assume the date is valid
+                                                let valid = true;
 
                                                 // reverse back the characters in the date's format
                                                 matches.reverse();
@@ -2123,7 +2498,7 @@
                                                         case 'M':
 
                                                             // if day is given as day name, we'll check against the names in the used language
-                                                            if (match.character == 'D' || match.character == 'l') iterable = element.data('Zebra_DatePicker').settings.days;
+                                                            if (match.character === 'D' || match.character === 'l') iterable = element.data('Zebra_DatePicker').settings.days;
 
                                                             // if month is given as month name, we'll check against the names in the used language
                                                             else iterable = element.data('Zebra_DatePicker').settings.months;
@@ -2138,7 +2513,7 @@
                                                                 if (valid) return true;
 
                                                                 // if month/day was entered correctly
-                                                                if (segments[index + 1].toLowerCase() == value.substring(0, (match.character == 'D' || match.character == 'M' ? 3 : value.length)).toLowerCase()) {
+                                                                if (segments[index + 1].toLowerCase() === value.substring(0, (match.character == 'D' || match.character == 'M' ? 3 : value.length)).toLowerCase()) {
 
                                                                     // extract the day/month from the value entered by the user
                                                                     switch (match.character) {
@@ -2199,7 +2574,7 @@
                                                     if (!original_year) original_year = new Date().getFullYear();
 
                                                     // generate a Date object using the values entered by the user
-                                                    var date = new Date(original_year, original_month - 1, original_day);
+                                                    const date = new Date(original_year, original_month - 1, original_day);
 
                                                     // if, after that, the date is the same as the date entered by the user
                                                     if (date.getFullYear() == original_year && date.getDate() == original_day && date.getMonth() == (original_month - 1)) {
@@ -2238,14 +2613,14 @@
                                 case 'textarea':
 
                                     // if element has a value
-                                    if ($.trim(element.val()) != '') {
+                                    if ($.trim(element.val()) !== '') {
 
                                         // if
                                         if (
 
                                             // rule is setup correctly
-                                            undefined != control_validation_rules['rules'][rule][0] &&
-                                            undefined != control_validation_rules['rules'][rule][1] &&
+                                            undefined !== control_validation_rules['rules'][rule][0] &&
+                                            undefined !== control_validation_rules['rules'][rule][1] &&
 
                                             // element to compare to exists
                                             $(control_validation_rules['rules'][rule][0]) &&
@@ -2254,31 +2629,33 @@
                                             plugin.validate_control($(control_validation_rules['rules'][rule][0])) === true &&
 
                                             // current element was validated and contains a valid date as the value
-                                            undefined != element.data('timestamp')
+                                            undefined !== element.data('timestamp')
 
                                         ) {
 
                                             // compare the two dates according to the comparison operator
-                                            switch (control_validation_rules['rules'][rule][1]) {
 
+                                            const date_id = control_validation_rules['rules'][rule][0];
+                                            const date = $('#' + date_id);
+                                            switch (control_validation_rules['rules'][rule][1]) {
                                                 case '>':
 
-                                                    control_is_valid = (element.data('timestamp') > $('#' + control_validation_rules['rules'][rule][0]).data('timestamp'));
+                                                    control_is_valid = (element.data('timestamp') > date.data('timestamp'));
                                                     break;
 
                                                 case '>=':
 
-                                                    control_is_valid = (element.data('timestamp') >= $('#' + control_validation_rules['rules'][rule][0]).data('timestamp'));
+                                                    control_is_valid = (element.data('timestamp') >= date.data('timestamp'));
                                                     break;
 
                                                 case '<':
 
-                                                    control_is_valid = (element.data('timestamp') < $('#' + control_validation_rules['rules'][rule][0]).data('timestamp'));
+                                                    control_is_valid = (element.data('timestamp') < date.data('timestamp'));
                                                     break;
 
                                                 case '<=':
 
-                                                    control_is_valid = (element.data('timestamp') <= $('#' + control_validation_rules['rules'][rule][0]).data('timestamp'));
+                                                    control_is_valid = (element.data('timestamp') <= date.data('timestamp'));
                                                     break;
 
                                             }
@@ -2308,7 +2685,7 @@
                                     exp = new RegExp('^[0-9' + _escape_regexp(control_validation_rules['rules'][rule][0]).replace(/\s/, '\\s') + ']+$', 'ig');
 
                                     // if value is not an empty string and the regular expression is not matched, the rule doesn't validate
-                                    if ($.trim(element.val()) != '' && !exp.test(element.val())) control_is_valid = false;
+                                    if ($.trim(element.val()) !== '' && !exp.test(element.val())) control_is_valid = false;
 
                                     break;
                             }
@@ -2328,7 +2705,7 @@
                                     if (
 
                                         // value is not an empty string
-                                        $.trim(element.val()) != '' &&
+                                        $.trim(element.val()) !== '' &&
                                         (
 
                                             // email address contains consecutive dots
@@ -2359,13 +2736,13 @@
                                 case 'textarea':
 
                                     // split addresses by commas
-                                    var addresses = element.val().split(',');
+                                    const addresses = element.val().split(',');
 
                                     // iterate through the email addresses
                                     $.each(addresses, function(index, address) {
 
                                         // if value is not an empty string and the regular expression is not matched, the rule doesn't validate
-                                        if ($.trim(address) != '' && null == $.trim(address).match(/^([a-zA-Z0-9_\-\+\~\^\{\}]+[\.]?)+@{1}([a-zA-Z0-9_\-\+\~\^\{\}]+[\.]?)+\.[A-Za-z0-9]{2,}$/)) control_is_valid = false;
+                                        if ($.trim(address) !== '' && null == $.trim(address).match(/^([a-zA-Z0-9_\-\+\~\^\{\}]+[\.]?)+@{1}([a-zA-Z0-9_\-\+\~\^\{\}]+[\.]?)+\.[A-Za-z0-9]{2,}$/)) control_is_valid = false;
 
                                     });
 
@@ -2383,7 +2760,7 @@
                                 case 'file':
 
                                     // see if a file was uploaded
-                                    var file_info = element.data('file_info');
+                                    file_info = element.data('file_info');
 
                                     // if a file was uploaded
                                     if (file_info)
@@ -2392,8 +2769,8 @@
                                         if (
 
                                             // there's something wrong with the uploaded file
-                                            undefined == file_info[2] ||
-                                            undefined == file_info[3] ||
+                                            undefined === file_info[2] ||
+                                            undefined === file_info[3] ||
 
                                             // there was a specific error while uploading the file
                                             file_info[2] != 0 ||
@@ -2418,13 +2795,13 @@
                                 case 'file':
 
                                     // see if a file was uploaded
-                                    var file_info = element.data('file_info');
+                                    file_info = element.data('file_info');
 
                                     // if a file was uploaded
                                     if (file_info) {
 
                                         // if file with mime types was not already loaded
-                                        if (undefined == plugin.mimes)
+                                        if (undefined === plugin.mimes)
 
                                             // load file with mime types
                                             $.ajax({
@@ -2436,13 +2813,13 @@
                                                 'dataType': 'json'
                                             });
 
-                                        var
+                                        // get the allowed file types
+                                        const allowed_file_types = $.map(control_validation_rules['rules'][rule][0].split(','), function (value) {
+                                                return $.trim(value)
+                                            });
 
-                                            // get the allowed file types
-                                            allowed_file_types = $.map(control_validation_rules['rules'][rule][0].split(','), function(value) { return $.trim(value) }),
-
-                                            // this will contain an array of file types that match for the currently uploaded file's mime type
-                                            matching_file_types = [];
+                                        // this will contain an array of file types that match for the currently uploaded file's mime type
+                                        const matching_file_types = [];
 
                                         // iterate through the known mime types
                                         $.each(plugin.mimes, function(extension, type) {
@@ -2456,7 +2833,7 @@
 
                                                 // a single mime type is associated with the file extension and
                                                 // the uploaded file's type matches the mime type
-                                                !$.isArray(type) && type == file_info[1]
+                                                !$.isArray(type) && type === file_info[1]
 
                                             )
 
@@ -2469,7 +2846,7 @@
 
                                         // is the file allowed?
 
-                                        var found = false;
+                                        let found = false;
 
                                         // iterate through the mime types associated with the uploaded file
                                         $.each(matching_file_types, function(index, extension) {
@@ -2509,15 +2886,15 @@
                                     if (
 
                                         // value is not an empty string
-                                        $.trim(element.val()) != '' &&
+                                        $.trim(element.val()) !== '' &&
 
                                         (
 
                                             // value is a minus sign
-                                            $.trim(element.val()) == '-' ||
+                                            $.trim(element.val()) === '-' ||
 
                                             // value is a dot
-                                            $.trim(element.val()) == '.' ||
+                                            $.trim(element.val()) === '.' ||
 
                                             // there are more than one minus signs
                                             (null != element.val().match(/\-/g) && element.val().match(/\-/g).length > 1) ||
@@ -2550,7 +2927,7 @@
                                 case 'file':
 
                                     // see if a file was uploaded
-                                    var file_info = element.data('file_info');
+                                    file_info = element.data('file_info');
 
                                     // if
                                     if (
@@ -2583,7 +2960,7 @@
                                     if (
 
                                         // value is not an empty string
-                                        element.val() != '' &&
+                                        element.val() !== '' &&
 
                                         // lower limit is given and the length of entered value is smaller than it
                                         (undefined != control_validation_rules['rules'][rule][0] && (element.val().length - _maxlength_diff(element)) < control_validation_rules['rules'][rule][0]) ||
@@ -2618,12 +2995,12 @@
                                     if (
 
                                         // value is not an empty string
-                                        $.trim(element.val()) != '' &&
+                                        $.trim(element.val()) !== '' &&
 
                                         (
 
                                             // value is a minus sign
-                                            $.trim(element.val()) == '-' ||
+                                            $.trim(element.val()) === '-' ||
 
                                             // there are more than one minus signs
                                             (null != element.val().match(/\-/g) && element.val().match(/\-/g).length > 1) ||
@@ -2653,14 +3030,14 @@
                                 case 'text':
 
                                     // value is not an empty string
-                                    if ($.trim(element.val()) != '') {
+                                    if ($.trim(element.val()) !== '') {
 
                                         // get the allowed min and max
-                                        var min = control_validation_rules['rules'][rule][0][0],
-                                            max = control_validation_rules['rules'][rule][0][1],
+                                        const min = control_validation_rules['rules'][rule][0][0];
+                                        const max = control_validation_rules['rules'][rule][0][1];
 
-                                            // make sure the value is a number
-                                            value = $.trim(parseFloat(element.val()));
+                                        // make sure the value is a number
+                                        const value = $.trim(parseFloat(element.val()));
 
                                         // if
                                         if (
@@ -2669,7 +3046,7 @@
                                             isNaN(value) ||
 
                                             // after applying parseFloat, the value is different than what the user entered
-                                            value != $.trim(element.val()) ||
+                                            value !== $.trim(element.val()) ||
 
                                             // or the value is not within range
                                             (!((min === 0 || value >= min) && (max === 0 || value <= max)))
@@ -2698,7 +3075,7 @@
                                     exp = new RegExp(control_validation_rules['rules'][rule][0], 'g');
 
                                     // if value is not an empty string and the regular expression is not matched, the rule doesn't validate
-                                    if ($.trim(element.val()) != '' && null == exp.exec(element.val())) control_is_valid = false;
+                                    if ($.trim(element.val()) !== '' && null == exp.exec(element.val())) control_is_valid = false;
 
                                     break;
 
@@ -2715,7 +3092,7 @@
                                 case 'radio':
 
                                     // by default, we assume there's nothing checked
-                                    var checked = false;
+                                    let checked = false;
 
                                     // iterate through the controls sharing the same name as the current element
                                     controls_groups[attributes['id']].each(function() {
@@ -2736,14 +3113,14 @@
                                 case 'textarea':
 
                                     // if value is am empty string, the rule doesn't validate
-                                    if ($.trim(element.val()) == '') control_is_valid = false;
+                                    if ($.trim(element.val()) === '') control_is_valid = false;
 
                                     break;
 
                                 case 'select-one':
 
                                     // if select control is part of a time-selection element, and no value is selected
-                                    if (element.hasClass('time') && element.get(0).selectedIndex == 0) {
+                                    if (element.hasClass('time') && element.get(0).selectedIndex === 0) {
 
                                         // the error message is set for a nonexisting control with the name set when
                                         // creating the form; the actual controls have a suffix of "hours", "minutes",
@@ -2764,15 +3141,15 @@
                                             element.hasClass('other') &&
 
                                             // the "other" value is set
-                                            element.val() == 'other' &&
+                                            element.val() === 'other' &&
 
                                             // nothing is entered in the attached "other" field
-                                            (!$('#' + attributes['id'] + '_other').length || $.trim($('#' + attributes['id'] + '_other').val()) == '')
+                                            (!$('#' + attributes['id'] + '_other').length || $.trim($('#' + attributes['id'] + '_other').val()).empty())
 
                                         ) ||
 
                                         // nothing is selected
-                                        element.get(0).selectedIndex == 0
+                                        element.get(0).selectedIndex === 0
 
                                     // the rule doesn't validate
                                     ) control_is_valid = false;
@@ -2782,7 +3159,7 @@
                                 case 'select-multiple':
 
                                     // if nothing is selected, the rule doesn't validate
-                                    if (element.get(0).selectedIndex == -1) control_is_valid = false;
+                                    if (element.get(0).selectedIndex === -1) control_is_valid = false;
 
                                     break;
 
@@ -2798,7 +3175,7 @@
                                 case 'file':
 
                                     // see if a file was uploaded
-                                    var file_info = element.data('file_info');
+                                    file_info = element.data('file_info');
 
                                     // if
                                     if (
@@ -2834,7 +3211,7 @@
                                     if (
 
                                         // value is not an empty string
-                                        $.trim(element.val()) != '' &&
+                                        $.trim(element.val()) !== '' &&
 
                                         // the regular expression is not matched
                                         !exp.test(element.val())
@@ -2857,10 +3234,10 @@
                         rule_not_passed = rule;
 
                         // for custom rules, we know the error message
-                        if (rule == 'custom') control_validation_rules.message = custom_rule_error_message;
+                        if (rule === 'custom') control_validation_rules.message = custom_rule_error_message;
 
                         // for other rules set the error message's text
-                        else control_validation_rules.message = plugin.settings.validation_rules[id][rule_not_passed][plugin.settings.validation_rules[id][rule_not_passed].length - (rule_not_passed == 'length' && plugin.settings.validation_rules[id][rule_not_passed].length == 4 ? 2 : 1)];
+                        else control_validation_rules.message = plugin.settings.validation_rules[id][rule_not_passed][plugin.settings.validation_rules[id][rule_not_passed].length - (rule_not_passed === 'length' && plugin.settings.validation_rules[id][rule_not_passed].length === 4 ? 2 : 1)];
 
                         // save the element's value
                         control_validation_rules.value = element.val();
@@ -2883,7 +3260,7 @@
          */
         plugin.validate = function() {
 
-            var element,
+            let element,
 
                 // by default, we assume the form validates
                 form_is_valid = true;
@@ -2892,10 +3269,10 @@
             plugin.clear_errors();
 
             // reset this variable
-            proxies_cache = new Object;
+            proxies_cache = {};
 
             // iterate through all the validation rules
-            for (index in validation_rules) {
+            for (let index in validation_rules) {
 
                 // if form is not valid, and we don't need to check all controls, don't check any further
                 if (!form_is_valid && !plugin.settings.validate_all) break;
@@ -2904,7 +3281,7 @@
                 element = validation_rules[index]['element'];
 
                 // if element does not validate, the form is not valid
-                if ((rule_not_passed = plugin.validate_control(element)) !== true) form_is_valid = false;
+                if (plugin.validate_control(element) !== true) form_is_valid = false;
 
             }
 
@@ -2921,393 +3298,6 @@
 
         }
 
-        /**
-         *  Continuously checks for value updates on fields having placeholders.
-         *
-         *  We needs this so that we can hide the placeholders when the fields are updated by the browsers' auto-complete
-         *  feature.
-         *
-         *  @access private
-         */
-        var _check_values = function() {
-
-            // iterate through the elements that have placeholders
-            $.each(placeholders, function() {
-
-                var
-
-                    // reference to the jQuery version of the element
-                    $element = $(this),
-
-                    // reference to the placeholder element
-                    $placeholder = $element.data('Zebra_Form_Placeholder');
-
-                // if element has no value and it doesn't have the focus, display the placeholder
-                if ($element.val() == '' && !$element.is(':focus')) $placeholder.show();
-
-                // otherwise, hide the placeholder
-                else $placeholder.hide();
-
-            });
-
-        }
-
-        /**
-         *  Escapes special characters in a string, preparing it for use in a regular expression.
-         *
-         *  @param  string  str     The string in which special characters should be escaped.
-         *
-         *  @return string          Returns the string with escaped special characters.
-         *
-         *  @access private
-         */
-        var _escape_regexp = function(str) {
-
-		  return str.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-
-        }
-
-        /**
-         *  Gets the cursor's position in a text element.
-         *
-         *  Used by the filter_input method.
-         *
-         *  @param  object  element     A DOM element
-         *
-         *  @return integer             Returns the cursor's position in a text or textarea element.
-         *
-         *  @access private
-         */
-        var _get_caret_position = function(element) {
-
-            // if selectionStart function exists, return the cursor's position
-            // (this is available for most browsers except IE < 9)
-    		if (element.selectionStart != null) return element.selectionStart;
-
-            // for IE < 9
-    		var range = document.selection.createRange(),
-    		    duplicate = range.duplicate();
-
-            // if element is a textbox, return the cursor's position
-    		if (element.type == 'text') return (0 - duplicate.moveStart('character', -100000));
-
-            // if element is a textarea
-    		else {
-
-                // do some computations...
-    			var  value = element.value,
-    			     offset = value.length;
-
-    			duplicate.moveToElementText(element);
-    			duplicate.setEndPoint('StartToStart', range);
-
-                // return the cursor's position
-    			return offset - duplicate.text.length;
-
-            }
-
-        }
-
-        /**
-         *  Computes the difference between a string's length when computed by PHP and by JavaScript.
-         *
-         *  In PHP new line characters have 2 bytes! Read more at
-         *  http://www.sitepoint.com/line-endings-in-javascript/ and at
-         *  http://drupal.org/node/1267802
-         *
-         *  @return void
-         *
-         *  @access private
-         */
-        var _maxlength_diff = function(el) {
-
-            var
-
-                // get the value in the textarea, if any
-                str = el.val(),
-
-                // get the length as computed by JavaScript
-                len1 = str.length,
-
-                // get the length as computed by PHP
-                len2 = str.replace(/(\r\n|\r|\n)/g, "\r\n").length;
-
-            // return the difference in length
-            return len2 - len1;
-
-        }
-
-        /**
-         *  Generates an iFrame shim in Internet Explorer 6 so that the tooltips appear above select boxes.
-         *
-         *  @return void
-         *
-         *  @access private
-         */
-        var _shim = function($element) {
-
-            // this is necessary only if browser is Internet Explorer 6
-    		if (browser.name == 'explorer' && browser.version == 6) {
-
-                // if an iFrame was not yet attached to the element
-                if (!$element.data('shim')) {
-
-                    var
-
-                        // get element's top and left position
-                        offset = $element.offset(),
-
-                        // the iFrame has to have the element's zIndex minus 1
-                        zIndex = parseInt($element.css('zIndex'), 10) - 1,
-
-                        // create the iFrame
-                        shim = jQuery('<iframe>', {
-                            'src':                  'javascript:document.write("")',
-                            'scrolling':            'no',
-                            'frameborder':          0,
-                            'allowTransparency':    'true',
-                            'class':                'Zebra_Form_error_iFrameShim',
-                            'css': {
-                                'zIndex':   zIndex,
-                                'position': 'absolute',
-                                'top':      offset.top,
-                                'left':     offset.left,
-                                'width':    $element.outerWidth(),
-                                'height':   $element.outerHeight(),
-                                'filter':   'progid:DXImageTransform.Microsoft.Alpha(opacity=0)',
-                                'display':  'block'
-                            }
-                        });
-
-                    // inject iFrame into DOM
-                    $('body').append(shim);
-
-                    // attach the shim to the element
-                    $element.data('shim', shim);
-
-                }
-
-            }
-
-        }
-
-        /**
-         *  Shows or hides, as necessary, the "other" options for a "select" control, that has an "other" option set.
-         *
-         *  @param  jQuery      $element    A  <select> element having the "other" property set.
-         *
-         *  @return void
-         *
-         *  @access private
-         */
-        var _show_hide_other_option = function($element) {
-
-            // reference to the "other option" text box
-            // it has the ID of the select control, suffixed by "_other"
-            var $other = $('#' + $element.attr('id') + '_other');
-
-            // if the select control's value is "other"
-            // show the "other option" text box
-            if ($element.val() == 'other') $other.css('display', 'block');
-
-            // if the select control's value is different than "other"
-            // hide the "other option" text box
-            else $other.css('display', 'none');
-
-        }
-
-        /**
-         *  Returns the string representation of an array; used by the "dependencies" rule.
-         *
-         *  @param  array   array   The array for which to create the string representation.
-         *
-         *  @return string  Returns the string representation of the array given as argument.
-         *
-         *  @access private
-         */
-        var _toString = function(array) {
-
-            // if argument is not an array, return the argument
-            if (!$.isArray(array)) return array;
-
-            var result = '';
-
-            // iterate through the entries in the array
-            $.each(array, function(index) {
-
-                var value = array[index];
-
-                // if entry is also an array, call this method recursively
-                // and place it inside some special characters
-                if ($.isArray(value)) value = '|' + _toString(value) + '|';
-
-                // build the string
-                result += (result != '' ? '' : '') + value;
-
-            });
-
-            // return the resulting string
-            return result;
-
-        }
-
-        /**
-         *  Returns an element's type
-         *
-         *  @param  jQuery          $element    A jQuery element for which to identify the type.
-         *
-         *  @return string          Returns an element's type.
-         *
-         *                          Possible values are:
-         *
-         *                          button,
-         *                          checkbox,
-         *                          file,
-         *                          password,
-         *                          radio,
-         *                          submit,
-         *                          text,
-         *                          select-one,
-         *                          select-multiple,
-         *                          textarea
-         *
-         *  @access private
-         */
-        var _type = function($element) {
-
-            // values that may be returned by the is() function
-            var types = [
-                    'button',
-                    'input:checkbox',
-                    'input:file',
-                    'input:image',
-                    'input:password',
-                    'input:radio',
-                    'input:submit',
-                    'input:text',
-                    'select',
-                    'textarea'
-                ],
-                html5_types = [
-                    'email',
-                    'number'
-                ];
-
-            // because elements of type "email" and "number" were not yet added to jQuery (as of jQuery 1.11.1)
-            // we'll test for those separately
-
-            // iterate through the possible types
-            for (index in html5_types)
-
-                // if we found the element's type to be one of those, treate element as input type="text"
-                if ($element.attr('type') && $element.attr('type').toLowerCase() == html5_types[index]) return 'text';
-
-            // iterate through the possible types
-            for (index in types)
-
-                // if we have an element's type
-                if ($element.is(types[index])) {
-
-                    // if type is "select"
-                    if (types[index] == 'select') {
-
-                        // if the "multiple" attribute is set
-                        if ($element.attr('multiple')) return 'select-multiple';
-
-                        // if the "multiple" attribute is not set
-                        else return 'select-one';
-
-                    }
-
-                    // return the element's type, from which we remove the "input:" string
-                    return types[index].replace(/input\:/, '');
-
-                }
-
-        }
-
-        /**
-         *  Checks if all the conditions set by the "dependencies" rule are met or not.
-         *
-         *  @param  string  element     The ID of the element to check.
-         *
-         *  @param  array   referer     (Private) Used by the library to prevent entering an infinite loop of dependencies.
-         *
-         *  @return boolean             Returns TRUE if all the conditions are met or FALSE otherwise.
-         *
-         *  @access private
-         */
-        var _validate_dependencies = function(element, referer) {
-
-            // if referer is not available, initialize it now
-            if (undefined == referer) referer = [];
-
-            // if there are more than 2 entries in the referer array, remove the first one
-            if (referer.length > 2) referer.shift();
-
-            // if current element is the referer array
-            if ($.inArray(element, referer) > -1)
-
-                // we're having a recursion and we're stopping execution
-                throw new Error('Infinite recursion detected. The loop of dependencies is created by the following elements: "' + referer.join('", "') + '"');
-
-            // add current element to the stack
-            referer.push(element);
-
-            // get all the conditions needed to validate the element
-            var conditions = plugin.settings.validation_rules[element]['dependencies'];
-
-            // if the name of a callback function is also given
-            // the actual conditions are in the first entry of the array
-            if (typeof conditions[1] == 'string') conditions = conditions[0];
-
-            var result = true;
-
-            // iterate through the elements the validation of the current element depends on (proxies)
-            for (var proxy in conditions) {
-
-                // if we have a cached result of the result
-                if (undefined != proxies_cache[proxy] && undefined != proxies_cache[proxy][conditions[proxy]])
-
-                    // get the result from cache
-                    result = proxies_cache[proxy][conditions[proxy]];
-
-                // if we don't have a cached result of the result
-                else {
-
-                    // if proxy also depends on another condition
-                    if (undefined != plugin.settings.validation_rules[proxy] && undefined != plugin.settings.validation_rules[proxy]['dependencies'])
-
-                        // check recursively that the conditions of all parents are met
-                        result = _validate_dependencies(proxy, referer);
-
-                    // continue if the conditions of all parents (if any) are met
-                    if (result) {
-
-                        // for each proxy/value combination there's a stored function
-                        // for the function's name we use a special array-to-string method
-                        var function_name = _toString(conditions[proxy]);
-
-                        // if proxy is not an existing element or any of the condition is not met, flag that
-                        if (!proxies[proxy] || !proxies[proxy]['conditions'][function_name]()) result = false;
-
-                    }
-
-                    // cache the result
-                    if (undefined == proxies_cache[proxy]) proxies_cache[proxy] = {};
-                    if (undefined == proxies_cache[proxy][conditions[proxy]]) proxies_cache[proxy][conditions[proxy]] = result;
-
-                }
-
-                // if there's a problem, don't check any furhter
-                if (!result) break;
-
-            }
-
-            // if not all conditions are met, don't validate further
-            return result;
-
-        }
 
         // fire up the plugin!
         // call the "constructor" method
@@ -3318,9 +3308,9 @@
     $.fn.Zebra_Form = function(options) {
 
         return this.each(function() {
-            var plugin = new $.Zebra_Form(this, options);
+            const plugin = new $.Zebra_Form(this, options);
             $(this).data('Zebra_Form', plugin);
-            if (typeof plugin.settings.on_ready == 'function') plugin.settings.on_ready($(this).attr('id'));
+            if (typeof plugin.settings.on_ready === 'function') plugin.settings.on_ready($(this).attr('id'));
         });
 
     }
