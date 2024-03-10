@@ -15,11 +15,8 @@
  *
  *  @return void
  */
-function dump()
+function dump(...$arguments): void
 {
-    // get the arguments passed to the function
-    $arguments = func_get_args();
-
     // if last argument is boolean TRUE
     if ($arguments[count($arguments) - 1] === true)
     {

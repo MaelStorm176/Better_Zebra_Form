@@ -138,7 +138,7 @@ class Zebra_Form_Button extends Zebra_Form_Control
      *
      *  @return string  The control's HTML code
      */
-    function toHTML(): string
+    public function toHTML(): string
     {
 
         return '<button ' . $this->_render_attributes() . ($this->form_properties['doctype'] === 'xhtml' ? '/' : '') . '>' . $this->attributes['value'] . '</button>';

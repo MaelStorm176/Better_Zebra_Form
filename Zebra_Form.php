@@ -296,44 +296,44 @@ class Zebra_Form
      *                          -   {@link Zebra_Form_Textarea textareas}
      *                          -   {@link Zebra_Form_Time time pickers}
      *
-     *  @param  mixed   $arguments  A list of arguments as required by the control that is added.
+     *  @param  array   $arguments  A list of arguments as required by the control that is added.
      *
      *  @return reference           Returns a reference to the newly created object
      */
-    function &add($type)
+    public function &add(string $type, ...$arguments)
     {
-
+        $arguments_count = count($arguments);
         // if shortcut for multiple radio buttons or checkboxes
         if ($type === 'radios' || $type === 'checkboxes') {
 
-            // if there are less than 3 arguments
-            if (func_num_args() < 3)
+            // if there are less than 2 arguments
+            if ($arguments_count < 2)
             {
                 // trigger a warning
-                self::_zebra_form_show_error('For <strong>' . $type . '</strong>, the <strong>add()</strong> method requires at least 3 arguments', E_USER_WARNING);
+                self::_zebra_form_show_error('For <strong>' . $type . '</strong>, the <strong>add()</strong> method requires at least 2 arguments', E_USER_WARNING);
             }
 
             // if third argument is not an array
-            elseif (!is_array(func_get_arg(2)))
+            elseif (!is_array($arguments[1]))
             {
                 // trigger a warning
-                self::_zebra_form_show_error('For <strong>' . $type . '</strong>, the <strong>add()</strong> method requires the 3rd argument to be an array', E_USER_WARNING);
+                self::_zebra_form_show_error('For <strong>' . $type . '</strong>, the <strong>add()</strong> method requires the 2rd argument to be an array', E_USER_WARNING);
             }
 
             // if everything is ok
             else {
 
                 // controls' name
-                $name = func_get_arg(1);
+                $name = $arguments[0];
 
                 // the values and labels
-                $values = func_get_arg(2);
+                $values = $arguments[1];
 
                 // a 4th argument (the default option) was passed to the method
-                if (func_num_args() >= 4) {
+                if ($arguments_count >= 3) {
 
                     // save the default value
-                    $default = func_get_arg(3);
+                    $default = $arguments[2];
 
                     // if default value is not given as an array
                     // (makes sense for checkboxes when there may be multiple preselected values)
@@ -344,8 +344,8 @@ class Zebra_Form
 
                 }
 
-                if (func_num_args() >= 5) {
-                    $additional = func_get_arg(4);
+                if ($arguments_count >= 4) {
+                    $additional = $arguments[3];
                 }
 
                 $counter = 0;
@@ -402,7 +402,7 @@ class Zebra_Form
                 // prepare arguments passed to the add() method
                 // notice that first argument is ignored as it refers to the type of the control to add
                 // and we don't have to pass that to the class
-                $arguments = array_slice(func_get_args(), 1);
+                // $arguments = array_slice(func_get_args(), 1);
 
                 // if name was not specified trigger an error
                 if (trim($arguments[0]) === '') {
@@ -566,7 +566,7 @@ class Zebra_Form
      *
      *  @return void
      */
-    function assets_path(string $server_path, string $url): void
+    public function assets_path(string $server_path, string $url): void
     {
 
         // set values
@@ -603,7 +603,7 @@ class Zebra_Form
      *
      *  @return void
      */
-    public function assign(string $variable_name, $value): void
+    public function assign(string $variable_name, mixed $value): void
     {
 
         // save the variable in an array that we will make available in the template file upon rendering
@@ -700,7 +700,7 @@ class Zebra_Form
      *@since  2.8.9
      *
      */
-    function captcha_storage(string $method): void
+    public function captcha_storage(string $method): void
     {
 
         // if storage method is "session"
@@ -721,11 +721,9 @@ class Zebra_Form
      *
      *  Deprecated since 2.8.9
      */
-    function client_side_validation($properties)
+    public function client_side_validation($properties): void
     {
-
         $this->clientside_validation($properties);
-
     }
 
     /**
@@ -2490,22 +2488,25 @@ class Zebra_Form
         // due to a bug (?) when the POST/GET data is larger than allowed by upload_max_filesize/post_max_size the
         // $_POST/$_GET/$_FILES superglobals are empty (see http://bugs.php.net/bug.php?id=49570)
         // but still, we need to present the user with some error message...
-        } elseif (empty($method) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+        }
+        elseif (empty($method) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             $form_is_valid = false;
         }
 
         // if form was not submitted and fields are to be auto-filled
         elseif ($this->form_properties['auto_fill'] !== false) {
-
             // we'll use this variable to keep track of groups of radio buttons/checkboxes
             // where we've randomly selected a value
             $checked = array();
 
             // iterate through the form's controls
-            foreach ($this->controls as $key => $control) {
+            foreach ($this->controls as $control) {
 
                 // get some attributes for each control
                 $attributes = $control->get_attributes(array('type', 'name', 'value'));
+                if (!isset($attributes['value'])) {
+                    $attributes['value'] = '';
+                }
 
                 // sanitize controls' name (remove square brackets)
                 $attributes['name'] = preg_replace('/[\[\]]/', '', $attributes['name']);

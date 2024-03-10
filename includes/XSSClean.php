@@ -600,7 +600,7 @@ class XSS_Clean
 			$cleaned = $str;
 			$str = preg_replace($non_displayables, '', $str);
 		}
-		while ($cleaned != $str);
+		while ($cleaned !== $str);
 
 		return $str;
 	}

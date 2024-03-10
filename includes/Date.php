@@ -9,6 +9,8 @@
  */
 class Zebra_Form_Date extends Zebra_Form_Control
 {
+    private int|bool $first_selectable_date;
+    private int|bool $last_selectable_date;
 
     /**
      *  Adds a date control to the form.
@@ -583,10 +585,8 @@ class Zebra_Form_Date extends Zebra_Form_Control
      */
     public function get_date(): string
     {
-        $result = $this->get_attributes('date');
-
         // if control had a value return it, or return an empty string otherwise
-        return $result['date'] ?? '';
+        return $this->get_attribute('date');
     }
 
     /**
@@ -1746,8 +1746,8 @@ class Zebra_Form_Date extends Zebra_Form_Control
 
                             // if weekday is to be disabled
                             // don't look any further
-                            if (in_array($weekday, $rule[3])) {
-                                return ($disabled = true);
+                            if (in_array($weekday, $rule[3], true)) {
+                                return true;
                             }
                         }
                     }

@@ -81,7 +81,7 @@
     $date->format('M d, Y');
 
     // selectable dates are starting with the current day
-    $date->direction(1);
+    $date->direction(true);
 
     $form->add('note', 'note_date', 'date', 'Date format is M d, Y');
 
@@ -102,9 +102,10 @@
         show_results();
 
     // otherwise
-    } else
-
+    }
+    else {
         // generate output using a custom template
         $form->render('includes/custom-templates/reservation.php');
+    }
 
 ?>

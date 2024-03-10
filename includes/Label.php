@@ -169,21 +169,21 @@ class Zebra_Form_Label extends Zebra_Form_Control
     public function toHTML(): string
     {
 
-        // get private attributes
-        $attributes = $this->get_attributes('label');
+        // get private attributes label and accesskey
+        $label = $this->get_attribute('label');
 
         // if access key needs to be showed
-        if (preg_match('/(?<!\\\)\$(.{1})/', $attributes['label'], $matches) > 0) {
+        if (preg_match('/(?<!\\\)\$(.{1})/', $label, $matches) > 0) {
 
             // set the requested accesskey
             $this->set_attributes(array('accesskey' => strtolower($matches[1])));
 
             // make the accesskey visible
-            $attributes['label'] = preg_replace('/\$(.{1})/', '<span class="underline">$1</span>', $attributes['label']);
+            $label = preg_replace('/\$(.{1})/', '<span class="underline">$1</span>', $label);
 
         }
 
-        return '<label ' . $this->_render_attributes() . '>' . preg_replace('/\\\\\$/', '$', $attributes['label']) . '</label>';
+        return '<label ' . $this->_render_attributes() . '>' . preg_replace('/\\\\\$/', '$', $label) . '</label>';
 
     }
 
